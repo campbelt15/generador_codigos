@@ -1,4 +1,5 @@
 import React, { useState } from "react"
+import swal from "sweetalert"
 import {
   Card,
   CardHeader,
@@ -14,37 +15,59 @@ const Home = () => {
   const [nombre, setNombre] = useState('')
   const [selectedProduct, setSelectedProduct] = useState('')
   const [codigoGenerado, setCodigoGenerado] = useState('')
+  const [error, setError] = useState(false)
 
   const handleSubmit = async (event) => {
     event.preventDefault()
-    
-    const data = {
-      nombre,
-      telefono,
-      producto: selectedProduct
-    }
 
-    try {
-      const response = await fetch('https://vbfz5r6da3.execute-api.us-east-1.amazonaws.com/dev/generador', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(data)
-      })
+    if ([nombre, telefono].includes('')) {
 
-      if (response.ok) {
-        const responseData = await response.json()
-      console.log('Respuesta del servidor:', responseData)
-      const responseBody = JSON.parse(responseData.body)
-      console.log('Código:', responseBody.codigo)
-      setCodigoGenerado(responseBody.codigo)
-      } else {
-        console.error('Error en la solicitud:', response.statusText)
+      setError(true)
+    } else {
+      setError(false)
+
+      const data = {
+        nombre,
+        telefono,
+        producto: selectedProduct
       }
-    } catch (error) {
-      console.error('Error al realizar la solicitud:', error.message)
+  
+      try {
+        const response = await fetch('https://vbfz5r6da3.execute-api.us-east-1.amazonaws.com/dev/generador', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(data)
+        })
+  
+        if (response.ok) {
+          const responseData = await response.json()
+        const responseBody = JSON.parse(responseData.body)
+        setCodigoGenerado(responseBody.codigo)
+        } else {
+          // swal('Error en la solicitud:', response.statusText)
+          swal({
+            title: 'Error en la solicitud',
+            text: response.statusText,
+            icon:'warning',
+            button:'OK',
+            timer: '3000'
+          })
+        }
+      } catch (error) {
+        // swal('Error al realizar la solicitud:', error.message)
+        swal({
+          title: 'Error al realizar la solicitud',
+          text: error.message,
+          icon:'error',
+          button:'OK',
+          timer: '3000'
+        })
+      }
+     
     }
+    
   }
   
   return (
@@ -55,7 +78,10 @@ const Home = () => {
         </CardHeader>
         <CardBody>
           <form className=" mt-2" onSubmit={handleSubmit}>
+          {error && 
+          <p className="alert alert-danger text-center">Todos los campos son obligatorios</p>}
             <div className="mb-1">
+              
               <Label className="form-label" for="tel_number">
                 Número de teléfono
               </Label>
@@ -67,7 +93,7 @@ const Home = () => {
                 value={telefono}
                 onChange={(event) => {
                   const input = event.target.value
-                  const regex = /^[0-9\b]+$/// Expresión regular para permitir solo números
+                  const regex = /^[0-9\b]+$/
                   if (input === '' || regex.test(input)) {
                     if (input.length <= 8) {
                       setTelefono(input)
@@ -102,7 +128,6 @@ const Home = () => {
               >
                 {/* <option value="">Selecciona un producto</option> */}
                 <option value="Suscripción PDF mensual">Suscripción PDF mensual</option>
-                {/* Agrega más opciones de productos aquí según sea necesario */}
               </Input>
             </div>
             
@@ -118,14 +143,13 @@ const Home = () => {
           <CardHeader style={{ backgroundColor: '#1274c5', color: '#fff' }}>
             <CardTitle>Código generado</CardTitle>
           </CardHeader>
-          <CardBody>
-            <h1 style={{ textAlign: 'center' }}>{codigoGenerado}</h1>
+          <CardBody >
+            <h1 style={{ textAlign: 'center', fontSize: '3rem', lineHeight: '1.5' }}>{codigoGenerado}</h1>
           </CardBody>
         </Card>
       )}
 
     </div>
-
   )
 }
 
