@@ -17,15 +17,17 @@ const Home = () => {
   const [codigoGenerado, setCodigoGenerado] = useState('')
   const [error, setError] = useState(false)
 
+  const generadorApi = process.env.REACT_APP_GENERADOR_API
+  const smsApi = process.env.REACT_APP_SMS_API
+
   const handleSubmit = async (event) => {
     event.preventDefault()
-
-    if ([nombre, telefono].includes('')) {
-
+  
+    if ([nombre, telefono].includes("")) {
       setError(true)
     } else {
       setError(false)
-
+  
       const data = {
         nombre,
         telefono,
@@ -33,42 +35,79 @@ const Home = () => {
       }
   
       try {
-        const response = await fetch('https://vbfz5r6da3.execute-api.us-east-1.amazonaws.com/dev/generador', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(data)
-        })
+        const response = await fetch(
+          generadorApi,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify(data)
+          }
+        )
   
         if (response.ok) {
           const responseData = await response.json()
-        const responseBody = JSON.parse(responseData.body)
-        setCodigoGenerado(responseBody.codigo)
+          const responseBody = JSON.parse(responseData.body)
+          setCodigoGenerado(responseBody.codigo)
+        
+          const smsData = {
+            message: `Código de suscripción: ${responseBody.codigo}`,
+            phone_number: `+502${telefono}`
+          }
+          
+          const smsResponse = await fetch(
+            smsApi,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json"
+              },
+              body: JSON.stringify(smsData)
+            }
+          )
+  
+          if (smsResponse.ok) {
+            swal({
+              title: "SMS",
+              text: "Código enviado correctamente.",
+              icon: "success",
+              button: "OK",
+              timer: "3000"
+            })
+          } else {
+            swal({
+              title: "Error al enviar el mensaje",
+              text: smsResponse.statusText,
+              icon: "warning",
+              button: "OK",
+              timer: "3000"
+            })
+
+          }
         } else {
-          // swal('Error en la solicitud:', response.statusText)
+
           swal({
-            title: 'Error en la solicitud',
+            title: "Error en la solicitud",
             text: response.statusText,
-            icon:'warning',
-            button:'OK',
-            timer: '3000'
+            icon: "warning",
+            button: "OK",
+            timer: "3000"
           })
         }
       } catch (error) {
-        // swal('Error al realizar la solicitud:', error.message)
+
         swal({
-          title: 'Error al realizar la solicitud',
+          title: "Error al realizar la solicitud",
           text: error.message,
-          icon:'error',
-          button:'OK',
-          timer: '3000'
+          icon: "error",
+          button: "OK",
+          timer: "3000"
         })
       }
-     
     }
-    
   }
+  
   
   return (
     <div>
