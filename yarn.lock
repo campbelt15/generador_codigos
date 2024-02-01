@@ -3974,7 +3974,7 @@ available-typed-arrays@^1.0.5:
 
 aws-amplify@^6.0.13:
   version "6.0.13"
-  resolved "https://registry.yarnpkg.com/aws-amplify/-/aws-amplify-6.0.13.tgz#ba2a23c0033b14ccb2123e4bb66fefbac4bca2a7"
+  resolved "https://registry.npmjs.org/aws-amplify/-/aws-amplify-6.0.13.tgz"
   integrity sha512-z3APLE2ZJfntKot6wsb1+hNlPji2n/PxRqHdL5YD2dUXYVmj5P+WlVF1Bs9dF+254K2O6VvLK/ecTM/hMWimwA==
   dependencies:
     "@aws-amplify/analytics" "7.0.13"
@@ -4353,10 +4353,10 @@ boolbase@^1.0.0, boolbase@~1.0.0:
   resolved "https://registry.npmjs.org/boolbase/-/boolbase-1.0.0.tgz"
   integrity sha512-JZOSA7Mo9sNGB8+UjSgzdLtokWAky1zbztM3WRLCbZ70/3cTANmQmOdR7y2g+J0e2WXywy1yS468tY+IruqEww==
 
-bootstrap@5.1.0:
-  version "5.1.0"
-  resolved "https://registry.npmjs.org/bootstrap/-/bootstrap-5.1.0.tgz"
-  integrity sha512-bs74WNI9BgBo3cEovmdMHikSKoXnDgA6VQjJ7TyTotU6L7d41ZyCEEelPwkYEzsG/Zjv3ie9IE3EMAje0W9Xew==
+bootstrap@^5.3.2:
+  version "5.3.2"
+  resolved "https://registry.yarnpkg.com/bootstrap/-/bootstrap-5.3.2.tgz#97226583f27aae93b2b28ab23f4c114757ff16ae"
+  integrity sha512-D32nmNWiQHo94BKHLmOrdjlL05q1c8oxbtBphQFb9Z5to6eGRDCm0QgeaZ4zFBHzfg2++rqa2JkqCcxDy0sH0g==
 
 bowser@^2.11.0:
   version "2.11.0"
@@ -11706,10 +11706,10 @@ react@^18.1.0:
   dependencies:
     loose-envify "^1.1.0"
 
-reactstrap@9.0.1:
-  version "9.0.1"
-  resolved "https://registry.npmjs.org/reactstrap/-/reactstrap-9.0.1.tgz"
-  integrity sha512-89VOv7SRlAlpS7RwXhzOQkSWkuhBR8LBsPGfNHifNL3WhtNP9y1sBdTcTYyH1ee2QtI8zRdwD0T5I/blHiwemg==
+reactstrap@^9.2.2:
+  version "9.2.2"
+  resolved "https://registry.yarnpkg.com/reactstrap/-/reactstrap-9.2.2.tgz#d3a062cb1492a9cf6ed4684698044fa1996350c9"
+  integrity sha512-4KroiGOdqZLAnMGzHjpErW3G7bLB+QbKzzMLIDXydPIV0y74lpdL7WtXHkLWAGInd97WCPNx4+R0NQDPyzIfhw==
   dependencies:
     "@babel/runtime" "^7.12.5"
     "@popperjs/core" "^2.6.0"

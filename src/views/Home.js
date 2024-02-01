@@ -68,6 +68,7 @@ const Home = () => {
           )
   
           if (smsResponse.ok) {
+            console.log(response)
             swal({
               title: "SMS",
               text: "Código enviado correctamente.",

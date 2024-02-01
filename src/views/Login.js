@@ -8,8 +8,10 @@ import {
   Form,
   Label,
   Input,
-  Button
+  Button,
+  Modal, ModalHeader, ModalBody, ModalFooter
 } from "reactstrap"
+import 'bootstrap/dist/css/bootstrap.min.css'
 import "@styles/react/pages/page-authentication.scss"
 import { useState } from "react"
 import UserPool from "../UserPool"
@@ -22,13 +24,33 @@ const Login = () => {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [error, setError] = useState("")
+  const [newPassword, setNewPassword] = useState('')
+  const [showModal, setShowModal] = useState(false)
+  const [cognitoUser, setCognitoUser] = useState(null)
+  const [userAttributes, setUserAttributes] = useState(null)
 
-  const illustration = skin === "dark" ? "login-v2-dark.svg" : "nuestro.svg"
+  const illustration = skin === "dark" ? "nuestro.svg" : "nuestro.svg"
   const source = require(`@src/assets/images/pages/${illustration}`).default
+
+  const handleNewPassword = () => {
+    delete userAttributes.email_verified
+    delete userAttributes.email
+
+    cognitoUser.completeNewPasswordChallenge(newPassword, userAttributes, {
+      onSuccess: (session) => {
+        console.log('Cambio de contraseña exitoso', session)
+        setShowModal(false)
+        navigate('/home')
+      },
+      onFailure: (err) => {
+        console.error(err)
+        setError('Error al cambiar la contraseña')
+      }
+    })
+  }
 
   const handleLogin = (e) => {
     e.preventDefault()
-    // Validar campos
     if (!email || !password) {
       setError("Por favor, completa todos los campos")
       return
@@ -45,52 +67,23 @@ const Login = () => {
       Pool: UserPool
     }
 
-    const cognitoUser = new CognitoUser(userData)
+    const newUser = new CognitoUser(userData)
+    setCognitoUser(newUser)
 
-    cognitoUser.authenticateUser(authenticationDetails, {
+    newUser.authenticateUser(authenticationDetails, {
       onSuccess: (session) => {
         console.log('Login exitoso', session)
-
-        // Verifica si se requiere una nueva contraseña
-        if (session.challengeName === 'NEW_PASSWORD_REQUIRED') {
-          // Redirige a la página de cambio de contraseña
-          // Puedes manejar la redirección aquí
-          navigate('/home')
-          console.log('Se requiere una nueva contraseña')
-        } else {
-          console.log('Redirige a la página de inicio')
-          navigate('/home')
-        }
+        navigate('/home')
       },
       onFailure: (err) => {
         console.error(err)
         setError('Correo o contraseña incorrectos')
       },
-      newPasswordRequired: (userAttributes, requiredAttributes) => {
-        console.log('Se requiere una nueva contraseña')
-        console.log('Atributos del usuario:', userAttributes)
-        console.log('Atributos requeridos:', requiredAttributes)
-        delete userAttributes.email_verified
-        delete userAttributes.email
-      
-        // Simulación de cambio de contraseña
-        const newPassword = '123456789' 
-      
-        // Completar el cambio de contraseña
-        cognitoUser.completeNewPasswordChallenge(newPassword, userAttributes, {
-          onSuccess: (session) => {
-            console.log('Cambio de contraseña exitoso', session)
-            navigate('/home')
-          },
-          onFailure: (err) => {
-            console.error(err)
-            setError('Error al cambiar la contraseña')
-          }
-        })
+      newPasswordRequired: (userAttrs) => {
+        setUserAttributes(userAttrs)
+        setShowModal(true)
       }
-      
     })
-    
   }
 
   return (
@@ -143,6 +136,25 @@ const Login = () => {
           </Col>
         </Col>
       </Row>
+
+
+      <Modal isOpen={showModal} toggle={() => setShowModal(false)}>
+        <ModalHeader toggle={() => setShowModal(false)}>Cambio de Contraseña Requerido</ModalHeader>
+        <ModalBody>
+          <p>Por favor, ingresa tu nueva contraseña.</p>
+          <Input
+            type="password"
+            value={newPassword}
+            onChange={(e) => setNewPassword(e.target.value)}
+            placeholder="Nueva contraseña"
+          />
+        </ModalBody>
+        <ModalFooter>
+          <Button color="primary" onClick={handleNewPassword}>Actualizar Contraseña</Button>
+          <Button color="secondary" onClick={() => setShowModal(false)}>Cancelar</Button>
+        </ModalFooter>
+      </Modal>
+
     </div>
   )
 }
