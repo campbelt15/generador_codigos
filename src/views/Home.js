@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React, { useEffect, useState } from "react"
 import swal from "sweetalert"
 import {
   Card,
@@ -9,6 +9,7 @@ import {
   Input,
   Button
 } from "reactstrap"
+import { useNavigate } from 'react-router-dom'
 
 const Home = () => {
   const [telefono, setTelefono] = useState('')
@@ -16,9 +17,17 @@ const Home = () => {
   const [selectedProduct, setSelectedProduct] = useState('')
   const [codigoGenerado, setCodigoGenerado] = useState('')
   const [error, setError] = useState(false)
+  const navigate = useNavigate()
 
   const generadorApi = process.env.REACT_APP_GENERADOR_API
   const smsApi = process.env.REACT_APP_SMS_API
+
+  useEffect(() => {
+    const sessionToken = localStorage.getItem('sessionToken') 
+    if (!sessionToken) {
+      navigate('/login') 
+    }
+  }, [])
 
   const handleSubmit = async (event) => {
     event.preventDefault()

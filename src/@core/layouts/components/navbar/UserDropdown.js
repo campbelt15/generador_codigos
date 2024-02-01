@@ -1,8 +1,5 @@
 // ** React Imports
-import { Link } from "react-router-dom"
-
-// ** Custom Components
-// import Avatar from "@components/avatar"
+// import { Link } from "react-router-dom"
 
 // ** Third Party Components
 import {
@@ -16,6 +13,9 @@ import {
   Power
 } from "react-feather"
 
+// import { CognitoUser } from 'amazon-cognito-identity-js' 
+import UserPool from "../../../../UserPool"
+
 // ** Reactstrap Imports
 import {
   UncontrolledDropdown,
@@ -28,6 +28,20 @@ import {
 // import defaultAvatar from "@src/assets/images/portrait/small/avatar-s-11.jpg"
 
 const UserDropdown = () => {
+
+  const handleLogout = () => {
+    const cognitoUser = UserPool.getCurrentUser()
+
+    if (cognitoUser) {
+      cognitoUser.signOut() // Cierra la sesión del usuario
+
+      localStorage.removeItem('sessionToken') // Limpia el token de sesión almacenado
+
+      // Redirige al usuario a la página de inicio de sesión u otra página de tu elección
+      window.location.href = '/login' // Cambia '/login' por la ruta deseada
+    }
+  }
+
   return (
     <UncontrolledDropdown tag="li" className="dropdown-user nav-item">
       <DropdownToggle
@@ -49,9 +63,9 @@ const UserDropdown = () => {
         /> */}
       </DropdownToggle>
       <DropdownMenu end>
-        <DropdownItem tag={Link} to="/login">
+        <DropdownItem onClick={handleLogout}>
           <Power size={14} className="me-75" />
-          <span className="align-middle">Logout</span>
+          <span className="align-middle">Salir</span>
         </DropdownItem>
       </DropdownMenu>
     </UncontrolledDropdown>

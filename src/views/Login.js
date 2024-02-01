@@ -40,6 +40,7 @@ const Login = () => {
       onSuccess: (session) => {
         console.log('Cambio de contraseña exitoso', session)
         setShowModal(false)
+        localStorage.setItem('sessionToken', session.getIdToken().getJwtToken()) 
         navigate('/home')
       },
       onFailure: (err) => {
@@ -73,6 +74,9 @@ const Login = () => {
     newUser.authenticateUser(authenticationDetails, {
       onSuccess: (session) => {
         console.log('Login exitoso', session)
+
+        localStorage.setItem('sessionToken', session.getIdToken().getJwtToken()) 
+
         navigate('/home')
       },
       onFailure: (err) => {
