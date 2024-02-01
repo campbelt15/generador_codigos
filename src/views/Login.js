@@ -12,6 +12,9 @@ import {
 } from "reactstrap"
 import "@styles/react/pages/page-authentication.scss"
 import { useState } from "react"
+import UserPool from "../UserPool"
+import { AuthenticationDetails, CognitoUser } from "amazon-cognito-identity-js"
+
 
 const Login = () => {
   const navigate = useNavigate()
@@ -31,12 +34,63 @@ const Login = () => {
       return
     }
 
-    if (email === 'ottoniel.campos@nuestrodiario.com.gt' && password === '12345678') {
-      console.log("Login exitoso para:", email)
-      navigate('/home')
-    } else {
-      console.log("Correo y contraseña no coinciden")
+    const authenticationData = {
+      Username: email,
+      Password: password
     }
+
+    const authenticationDetails = new AuthenticationDetails(authenticationData)
+    const userData = {
+      Username: email,
+      Pool: UserPool
+    }
+
+    const cognitoUser = new CognitoUser(userData)
+
+    cognitoUser.authenticateUser(authenticationDetails, {
+      onSuccess: (session) => {
+        console.log('Login exitoso', session)
+
+        // Verifica si se requiere una nueva contraseña
+        if (session.challengeName === 'NEW_PASSWORD_REQUIRED') {
+          // Redirige a la página de cambio de contraseña
+          // Puedes manejar la redirección aquí
+          navigate('/home')
+          console.log('Se requiere una nueva contraseña')
+        } else {
+          console.log('Redirige a la página de inicio')
+          navigate('/home')
+        }
+      },
+      onFailure: (err) => {
+        console.error(err)
+        setError('Correo o contraseña incorrectos')
+      },
+      newPasswordRequired: (userAttributes, requiredAttributes) => {
+        console.log('Se requiere una nueva contraseña')
+        console.log('Atributos del usuario:', userAttributes)
+        console.log('Atributos requeridos:', requiredAttributes)
+        delete userAttributes.email_verified
+        delete userAttributes.email
+      
+        // Simulación de cambio de contraseña
+        const newPassword = '123456789' 
+      
+        // Completar el cambio de contraseña
+        cognitoUser.completeNewPasswordChallenge(newPassword, userAttributes, {
+          onSuccess: (session) => {
+            console.log('Cambio de contraseña exitoso', session)
+            navigate('/home')
+          },
+          onFailure: (err) => {
+            console.error(err)
+            setError('Error al cambiar la contraseña')
+          }
+        })
+      }
+      
+    })
+    
   }
 
   return (
