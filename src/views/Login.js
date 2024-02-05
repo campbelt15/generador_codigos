@@ -129,7 +129,13 @@ const Login = () => {
                   id="login-password"
                   placeholder="********"
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={(event) => {
+                    const input = event.target.value
+                    const regex = /^\S*$/ 
+                    if (regex.test(input)) {
+                      setPassword(input)
+                    }
+                  }}
                 />
               </div>
               {error && <p style={{ color: "red" }}>{error}</p>}
@@ -146,12 +152,19 @@ const Login = () => {
         <ModalHeader toggle={() => setShowModal(false)}>Cambio de Contraseña Requerido</ModalHeader>
         <ModalBody>
           <p>Por favor, ingresa tu nueva contraseña.</p>
-          <Input
-            type="password"
-            value={newPassword}
-            onChange={(e) => setNewPassword(e.target.value)}
-            placeholder="Nueva contraseña"
-          />
+          <InputPasswordToggle
+                  className="input-group-merge"
+                  id="login-password"
+                  placeholder="********"
+                  value={newPassword}
+                  onChange={(event) => {
+                    const input = event.target.value
+                    const regex = /^\S*$/ 
+                    if (regex.test(input)) {
+                      setNewPassword(input)
+                    }
+                  }}
+                />
         </ModalBody>
         <ModalFooter>
           <Button color="primary" onClick={handleNewPassword}>Actualizar Contraseña</Button>

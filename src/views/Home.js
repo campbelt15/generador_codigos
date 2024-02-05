@@ -16,18 +16,39 @@ const Home = () => {
   const [nombre, setNombre] = useState('')
   const [selectedProduct, setSelectedProduct] = useState('')
   const [codigoGenerado, setCodigoGenerado] = useState('')
+  const [productOptions, setProductOptions] = useState([])
   const [error, setError] = useState(false)
   const navigate = useNavigate()
 
   const generadorApi = process.env.REACT_APP_GENERADOR_API
   const smsApi = process.env.REACT_APP_SMS_API
+  const planApi = process.env.REACT_APP_PLAN_API
 
   useEffect(() => {
     const sessionToken = localStorage.getItem('sessionToken') 
     if (!sessionToken) {
       navigate('/login') 
     }
-  }, [])
+  
+    // Realizar una solicitud a la API para obtener las opciones de los planes
+    fetch(planApi)
+      .then((response) => response.json())
+      .then((data) => {
+        try {
+          const parsedData = JSON.parse(data.body)
+          if (Array.isArray(parsedData)) {
+            setProductOptions(parsedData)
+          } else {
+            console.error("La respuesta de la API no es un arreglo válido:", parsedData)
+          }
+        } catch (error) {
+          console.error("Error al parsear la respuesta JSON:", error)
+        }
+      })
+      .catch((error) => {
+        console.error("Error al obtener las opciones:", error)
+      })
+  }, [navigate])
 
   const handleSubmit = async (event) => {
     event.preventDefault()
@@ -176,7 +197,11 @@ const Home = () => {
                 onChange={(event) => setSelectedProduct(event.target.value)}
               >
                 {/* <option value="">Selecciona un producto</option> */}
-                <option value="Suscripción PDF mensual">Suscripción PDF mensual</option>
+                {productOptions.map((option) => (
+                  <option key={option.id} value={option.tipo_plan}>
+                    {option.tipo_plan}
+                  </option>
+                ))}
               </Input>
             </div>
             
