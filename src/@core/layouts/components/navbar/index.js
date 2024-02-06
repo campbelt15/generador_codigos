@@ -15,13 +15,13 @@ const ThemeNavbar = (props) => {
   const { skin, setSkin, setMenuVisibility } = props
 
   // ** Function to toggle Theme (Light/Dark)
-  const ThemeToggler = () => {
-    if (skin === "dark") {
-      return <Sun className="ficon" onClick={() => setSkin("light")} />
-    } else {
-      return <Moon className="ficon" onClick={() => setSkin("dark")} />
-    }
-  }
+  // const ThemeToggler = () => {
+  //   if (skin === "dark") {
+  //     return <Sun className="ficon" onClick={() => setSkin("light")} />
+  //   } else {
+  //     return <Moon className="ficon" onClick={() => setSkin("dark")} />
+  //   }
+  // }
 
   return (
     <Fragment>
@@ -36,11 +36,7 @@ const ThemeNavbar = (props) => {
             </NavLink>
           </NavItem>
         </ul>
-        <NavItem className="d-none d-lg-block">
-          <NavLink className="nav-link-style">
-            <ThemeToggler />
-          </NavLink>
-        </NavItem>
+
       </div>
       <NavbarUser skin={skin} setSkin={setSkin} />
     </Fragment>

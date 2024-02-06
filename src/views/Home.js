@@ -182,7 +182,14 @@ const Home = () => {
                 id="customer_name"
                 placeholder="Juan Peréz"
                 value={nombre}
-                onChange={(event) => setNombre(event.target.value)}
+                onChange={(event) => {
+                  const input = event.target.value
+                  const regex = /^[a-zA-Z\s\b]+$/
+                  if (input === '' || regex.test(input)) {
+                      setNombre(input)
+                  }
+                }
+              }
               />
             </div>
 
