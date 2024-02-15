@@ -31,6 +31,7 @@ const Login = lazy(() => import("../../views/Login"))
 const Register = lazy(() => import("../../views/Register"))
 const ForgotPassword = lazy(() => import("../../views/ForgotPassword"))
 const Error = lazy(() => import("../../views/Error"))
+const Codigos = lazy(() => import("../../views/Codigos"))
 
 // ** Merge Routes
 const Routes = [
@@ -44,8 +45,8 @@ const Routes = [
     element: <Home />
   },
   {
-    path: "/second-page",
-    element: <SecondPage />
+    path: "/codigos",
+    element: <Codigos />
   },
   {
     path: "/login",

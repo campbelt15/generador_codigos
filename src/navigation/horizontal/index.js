@@ -1,4 +1,4 @@
-import { Mail, Home } from "react-feather"
+import { Archive, Home } from "react-feather"
 
 export default [
   {
@@ -6,5 +6,11 @@ export default [
     title: "Generador",
     icon: <Home size={20} />,
     navLink: "/home"
+  },
+  {
+    id: "codigos",
+    title: "Codigos",
+    icon: <Archive size={20} />,
+    navLink: "/codigos"
   }
 ]
