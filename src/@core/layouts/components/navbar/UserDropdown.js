@@ -36,6 +36,7 @@ const UserDropdown = () => {
       cognitoUser.signOut() // Cierra la sesión del usuario
 
       localStorage.removeItem('sessionToken') // Limpia el token de sesión almacenado
+      localStorage.removeItem('userEmail') //Limpia el correo de la sesion
 
       // Redirige al usuario a la página de inicio de sesión u otra página de tu elección
       window.location.href = '/login' // Cambia '/login' por la ruta deseada

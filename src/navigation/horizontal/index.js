@@ -1,4 +1,4 @@
-import { Archive, Home } from "react-feather"
+import { Archive, Home, Users } from "react-feather"
 
 export default [
   {

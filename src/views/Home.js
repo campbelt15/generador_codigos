@@ -24,6 +24,8 @@ const Home = () => {
   const smsApi = process.env.REACT_APP_SMS_API
   const planApi = process.env.REACT_APP_PLAN_API
 
+  const userEmail = localStorage.getItem('userEmail')
+
   useEffect(() => {
     const sessionToken = localStorage.getItem('sessionToken') 
     if (!sessionToken) {
@@ -53,15 +55,16 @@ const Home = () => {
   const handleSubmit = async (event) => {
     event.preventDefault()
   
-    if ([nombre, telefono].includes("")) {
+    if ([nombre, telefono, selectedProduct].includes("")) {
       setError(true)
     } else {
       setError(false)
-  
+
       const data = {
         nombre,
         telefono,
-        producto: selectedProduct
+        producto: selectedProduct,
+        responsable: userEmail
       }
   
       try {
@@ -98,7 +101,7 @@ const Home = () => {
           )
   
           if (smsResponse.ok) {
-            console.log(response)
+           
             swal({
               title: "SMS",
               text: "Código enviado correctamente.",
@@ -201,9 +204,12 @@ const Home = () => {
                 type="select"
                 id="product"
                 value={selectedProduct}
-                onChange={(event) => setSelectedProduct(event.target.value)}
+                onChange={(event) => {
+                  console.log("Nuevo valor seleccionado:", event.target.value)
+                  setSelectedProduct(event.target.value)
+                }}
               >
-                {/* <option value="">Selecciona un producto</option> */}
+                <option value="">Selecciona un producto</option>
                 {productOptions.map((option) => (
                   <option key={option.id} value={option.tipo_plan}>
                     {option.tipo_plan}

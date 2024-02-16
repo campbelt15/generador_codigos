@@ -5,7 +5,7 @@ import { DataTable } from 'primereact/datatable'
 import { Column } from 'primereact/column'
 import { InputText } from 'primereact/inputtext'
 
-const Codigos = () => {
+const Usuario = () => {
     const reactivateApi = process.env.REACT_APP_REACTIVATE_API
     const [data, setData] = useState([])
     const [globalFilter, setGlobalFilter] = useState(null)
@@ -134,4 +134,4 @@ const Codigos = () => {
   )
 }
 
-export default Codigos
+export default Usuario
