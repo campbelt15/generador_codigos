@@ -28,9 +28,22 @@ import {
 // import defaultAvatar from "@src/assets/images/portrait/small/avatar-s-11.jpg"
 
 const UserDropdown = () => {
+  const userName_sin_formato = localStorage.getItem('userName')
+
+  //funcion para formatear el nombre
+  function capitalize(str) {
+    return str
+      .toLowerCase()
+      .split(' ')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ')
+  }
+  
+  const userName = capitalize(userName_sin_formato)
 
   const handleLogout = () => {
     const cognitoUser = UserPool.getCurrentUser()
+    
 
     if (cognitoUser) {
       cognitoUser.signOut() // Cierra la sesión del usuario
@@ -53,7 +66,7 @@ const UserDropdown = () => {
       >
         <div className="user-nav d-sm-flex d-none">
           {/* <span className="user-name fw-bold">John Doe</span> */}
-          <span className="user-name fw-bold">Admin</span>
+          <span className="user-name fw-bold">{userName}</span>
           {/* <span className="user-status">Admin</span> */}
         </div>
         {/* <Avatar

@@ -22,6 +22,7 @@ const Login = () => {
   const navigate = useNavigate()
   const { skin } = useSkin()
   const [email, setEmail] = useState("")
+  const [name, setName] = useState('')
   const [password, setPassword] = useState("")
   const [error, setError] = useState("")
   const [newPassword, setNewPassword] = useState('')
@@ -33,14 +34,22 @@ const Login = () => {
   const source = require(`@src/assets/images/pages/${illustration}`).default
 
   const handleNewPassword = () => {
-    delete userAttributes.email_verified
-    delete userAttributes.email
-
-    cognitoUser.completeNewPasswordChallenge(newPassword, userAttributes, {
+    const updatedUserAttributes = {
+      ...userAttributes,
+      name
+    }
+  
+    // Elimina atributos de solo lectura
+    delete updatedUserAttributes.email_verified
+    delete updatedUserAttributes.email
+    // Otros atributos de solo lectura pueden ser eliminados aquí si es necesario
+  
+    cognitoUser.completeNewPasswordChallenge(newPassword, updatedUserAttributes, {
       onSuccess: (session) => {
         setShowModal(false)
-        localStorage.setItem('sessionToken', session.getIdToken().getJwtToken()) 
+        localStorage.setItem('sessionToken', session.getIdToken().getJwtToken())
         localStorage.setItem('userEmail', email)
+        localStorage.setItem('userName', name)
         navigate('/home')
       },
       onFailure: (err) => {
@@ -49,7 +58,7 @@ const Login = () => {
       }
     })
   }
-
+  
   const handleLogin = (e) => {
     e.preventDefault()
     if (!email || !password) {
@@ -73,9 +82,9 @@ const Login = () => {
 
     newUser.authenticateUser(authenticationDetails, {
       onSuccess: (session) => {
-
         localStorage.setItem('sessionToken', session.getIdToken().getJwtToken()) 
         localStorage.setItem('userEmail', email)
+        localStorage.setItem('userName', session.getIdToken().decodePayload().name)
 
         navigate('/home')
       },
@@ -89,6 +98,7 @@ const Login = () => {
       }
     })
   }
+
 
   return (
     <div className="auth-wrapper auth-cover" style={{ backgroundColor: '#1274c5' }}>
@@ -139,18 +149,27 @@ const Login = () => {
                 />
               </div>
               {error && <p style={{ color: "red" }}>{error}</p>}
-              <Button type="submit" color="secondary" block>
+              <Button className="mt-3" type="submit" color="primary" block>
                 Ingresar
               </Button>
             </Form>
+            {/* <Button color="link" onClick={() => showForgotPassword()}>¿Olvidaste tu contraseña?</Button> */}
+            <Link to="/forgot-password" className="btn btn-link">¿Olvidaste tu contraseña?</Link>
+
           </Col>
         </Col>
       </Row>
 
-
       <Modal isOpen={showModal} toggle={() => setShowModal(false)}>
         <ModalHeader toggle={() => setShowModal(false)}>Cambio de Contraseña Requerido</ModalHeader>
         <ModalBody>
+        <p>Por favor, ingresa tu nombre y nueva contraseña.</p>
+        <Input
+          type="text"
+          placeholder="Nombre"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+        />
           <p>Por favor, ingresa tu nueva contraseña.</p>
           <InputPasswordToggle
                   className="input-group-merge"
@@ -171,6 +190,7 @@ const Login = () => {
           <Button color="secondary" onClick={() => setShowModal(false)}>Cancelar</Button>
         </ModalFooter>
       </Modal>
+
 
     </div>
   )

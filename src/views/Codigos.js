@@ -9,6 +9,7 @@ const Codigos = () => {
     const reactivateApi = process.env.REACT_APP_REACTIVATE_API
     const [data, setData] = useState([])
     const [globalFilter, setGlobalFilter] = useState(null)
+    const userEmail = localStorage.getItem('userEmail')
 
     const loadData = () => {
       fetch('https://vbfz5r6da3.execute-api.us-east-1.amazonaws.com/dev/obtener_lista_codigos')
@@ -26,6 +27,12 @@ const Codigos = () => {
 
     const handleActivateClick = async (itemData) => {
       console.log(itemData)
+
+      const data = {
+        ...itemData,
+        correo : userEmail
+      }
+
       try {
         const response = await fetch(
           reactivateApi,
@@ -34,7 +41,7 @@ const Codigos = () => {
             headers: {
               "Content-Type": "application/json"
             },
-            body: JSON.stringify(itemData)
+            body: JSON.stringify(data)
           }
         )
 
@@ -121,7 +128,7 @@ const Codigos = () => {
             {/* <Column field="responsable" className="d-none d-xxl-table-cell me-1" headerClassName="d-none d-xxl-table-cell" sortable header="Responsable"></Column> */}
             <Column field="codigo" bodyClassName="" header="Código" ></Column>
             <Column field="fecha_actual" className="d-none d-xxl-table-cell" headerClassName="d-none d-xxl-table-cell" sortable header="Fecha Creación"></Column>
-            {/* <Column field="hora_actual" bodyClassName="" sortable header="Hora Creación"></Column> */}
+            <Column field="hora_actual" bodyClassName="" sortable header="Hora Creación"></Column>
             <Column field="activate_exp" className="d-none d-xxl-table-cell" headerClassName="d-none d-xxl-table-cell" sortable header="Expiración Código"></Column>
             <Column field="nombre" bodyClassName="" sortable header="Cliente"></Column>
             <Column field="producto" bodyClassName="" sortable header="Producto"></Column>
