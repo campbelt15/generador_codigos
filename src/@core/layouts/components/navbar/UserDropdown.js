@@ -1,5 +1,4 @@
-// ** React Imports
-// import { Link } from "react-router-dom"
+import UserLogs from "../../../components/logs_user/UserLogs"
 
 // ** Third Party Components
 import {
@@ -28,7 +27,9 @@ import {
 // import defaultAvatar from "@src/assets/images/portrait/small/avatar-s-11.jpg"
 
 const UserDropdown = () => {
-  const userName_sin_formato = localStorage.getItem('userName')
+  const userName_sin_formato = localStorage.getItem('userName') || ''
+  const userEmail = localStorage.getItem('userEmail')
+  const userIP = localStorage.getItem('userIP')
 
   //funcion para formatear el nombre
   function capitalize(str) {
@@ -44,12 +45,15 @@ const UserDropdown = () => {
   const handleLogout = () => {
     const cognitoUser = UserPool.getCurrentUser()
     
+    UserLogs('Logout', 'Logout', userIP, userEmail)
 
     if (cognitoUser) {
       cognitoUser.signOut() // Cierra la sesión del usuario
 
-      localStorage.removeItem('sessionToken') // Limpia el token de sesión almacenado
-      localStorage.removeItem('userEmail') //Limpia el correo de la sesion
+      localStorage.removeItem('sessionToken') 
+      localStorage.removeItem('userEmail') 
+      localStorage.removeItem('userIP') 
+      localStorage.removeItem('userName') 
 
       // Redirige al usuario a la página de inicio de sesión u otra página de tu elección
       window.location.href = '/login' // Cambia '/login' por la ruta deseada

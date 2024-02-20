@@ -1,4 +1,6 @@
 import { useSkin } from "@hooks/useSkin"
+import ObtenerIP from "../@core/components/Ip_user/ObtenerIp"
+import UserLogs from "../@core/components/logs_user/UserLogs"
 import { Link, useNavigate } from "react-router-dom"
 import InputPasswordToggle from "@components/input-password-toggle"
 import {
@@ -81,10 +83,18 @@ const Login = () => {
     setCognitoUser(newUser)
 
     newUser.authenticateUser(authenticationDetails, {
-      onSuccess: (session) => {
+      onSuccess: async (session) => {
         localStorage.setItem('sessionToken', session.getIdToken().getJwtToken()) 
         localStorage.setItem('userEmail', email)
         localStorage.setItem('userName', session.getIdToken().decodePayload().name)
+
+        const ipCliente = await ObtenerIP() 
+
+        await UserLogs('Login', 'Login', ipCliente, email)
+
+        if (ipCliente) {
+          localStorage.setItem('userIP', ipCliente) 
+        }
 
         navigate('/home')
       },

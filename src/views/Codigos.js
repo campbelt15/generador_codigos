@@ -10,6 +10,7 @@ const Codigos = () => {
     const [data, setData] = useState([])
     const [globalFilter, setGlobalFilter] = useState(null)
     const userEmail = localStorage.getItem('userEmail')
+    const userIP = localStorage.getItem('userIP')
 
     const loadData = () => {
       fetch('https://vbfz5r6da3.execute-api.us-east-1.amazonaws.com/dev/obtener_lista_codigos')
@@ -30,7 +31,8 @@ const Codigos = () => {
 
       const data = {
         ...itemData,
-        correo : userEmail
+        correo : userEmail,
+        ip: userIP
       }
 
       try {

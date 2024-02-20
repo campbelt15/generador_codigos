@@ -25,6 +25,7 @@ const Home = () => {
   const planApi = process.env.REACT_APP_PLAN_API
 
   const userEmail = localStorage.getItem('userEmail')
+  const userIP = localStorage.getItem('userIP')
 
   useEffect(() => {
     const sessionToken = localStorage.getItem('sessionToken') 
@@ -64,6 +65,7 @@ const Home = () => {
         nombre,
         telefono,
         producto: selectedProduct,
+        ip: userIP,
         responsable: userEmail
       }
   
