@@ -1,19 +1,4 @@
-.table .p-datatable-tbody>tr>td {
-    padding-top: 10px;
-    /* Ajusta este valor según tus necesidades */
-    padding-bottom: 10px;
-    /* Ajusta este valor según tus necesidades */
-}
-
-.table .p-datatable-thead>tr>th {
-    background-color: #f4f4f4;
-    /* Color de fondo para los encabezados */
-    font-weight: bold;
-    /* Texto en negrita para los encabezados */
-}
-
-.table .p-paginator .p-paginator-pages .p-paginator-page.p-highlight {
-    background-color: var(--primary-color);
-    /* Usa la variable de color de tu tema, si tienes uno */
-    border-color: var(--primary-color);
+.custom_table .p-datatable-tbody>tr>td {
+    padding-top: 8px;
+    padding-bottom: 8px;
 }

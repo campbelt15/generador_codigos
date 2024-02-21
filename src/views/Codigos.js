@@ -1,12 +1,14 @@
 import { useEffect, useState } from "react"
 import swal from "sweetalert"
 import '../assets/css/codigos_datatable.css'
+import "primereact/resources/themes/lara-light-cyan/theme.css"
 import { DataTable } from 'primereact/datatable'
 import { Column } from 'primereact/column'
 import { InputText } from 'primereact/inputtext'
 
 const Codigos = () => {
     const reactivateApi = process.env.REACT_APP_REACTIVATE_API
+    const [isLoading, setIsLoading] = useState(true)
     const [data, setData] = useState([])
     const [globalFilter, setGlobalFilter] = useState(null)
     const userEmail = localStorage.getItem('userEmail')
@@ -19,8 +21,14 @@ const Codigos = () => {
           const responseBody = JSON.parse(data.body)
           setData(responseBody.Items)
         })
-        .catch(error => console.error('Error al cargar los datos:', error))
+        .catch(error => {
+          console.error('Error al cargar los datos:', error)
+        })
+        .finally(() => {
+          setIsLoading(false)// Finalizar la carga después de obtener los datos o en caso de error
+        })
     }
+    
     
     useEffect(() => {
       loadData()
@@ -108,7 +116,9 @@ const Codigos = () => {
 
   return (
     <>
-
+    {isLoading ? (
+      <p>Cargando datos...</p> 
+    ) : (
       <DataTable 
           value={data}
           dataKey="id"
@@ -121,14 +131,15 @@ const Codigos = () => {
           sortOrder={-1}
           stripedRows
           rowsPerPageOptions={[5, 10, 25, 50]}
-          tableStyle={{ minWidth: '50rem', lineHeight: '1.5' }}
-          className="table"
+          tableStyle={{ minWidth: '30rem', lineHeight: '1.5' }}
+          className="custom_table"
           header={header}
           footer={footer}
         >
             
             {/* <Column field="responsable" className="d-none d-xxl-table-cell me-1" headerClassName="d-none d-xxl-table-cell" sortable header="Responsable"></Column> */}
             <Column field="codigo" bodyClassName="" header="Código" ></Column>
+            <Column field="date" bodyClassName="hidden" headerClassName='hidden'></Column>
             <Column field="fecha_actual" className="d-none d-xxl-table-cell" headerClassName="d-none d-xxl-table-cell" sortable header="Fecha Creación"></Column>
             <Column field="hora_actual" bodyClassName="" sortable header="Hora Creación"></Column>
             <Column field="activate_exp" className="d-none d-xxl-table-cell" headerClassName="d-none d-xxl-table-cell" sortable header="Expiración Código"></Column>
@@ -137,8 +148,9 @@ const Codigos = () => {
             <Column field="telefono" bodyClassName="" header="Teléfono"></Column>
             <Column field="date_exp" bodyClassName="" header="Expiración Plan"></Column>
             <Column field="actions" header="Acción" body={actionBody}></Column>
-            <Column field="date" bodyClassName="hidden" ></Column>
+            
         </DataTable>
+      )}
     </>
   )
 }
