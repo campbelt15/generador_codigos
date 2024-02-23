@@ -9,8 +9,6 @@ const UserLogs = async (accion, detalle, ip, email) => {
             responsable: email
           }
   
-          console.log(data)
-  
           try {
             const response = await fetch(
               insertLogsApi,
@@ -24,8 +22,7 @@ const UserLogs = async (accion, detalle, ip, email) => {
             )
   
             if (response.ok) {
-              console.log('dentro del response')
-              console.log(response)
+              // console.log('dentro del response')
             }
             
           } catch (error) {

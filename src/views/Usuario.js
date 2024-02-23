@@ -25,7 +25,6 @@ const Usuario = () => {
     }, [])
 
     const handleActivateClick = async (itemData) => {
-      console.log(itemData)
       try {
         const response = await fetch(
           reactivateApi,
@@ -57,7 +56,6 @@ const Usuario = () => {
           })
 
         }
-        console.log("Datos actualizados con éxito", response)
       } catch (error) {
         // Manejar errores aquí
         console.error("Error al actualizar los datos", error)

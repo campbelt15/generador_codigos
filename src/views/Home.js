@@ -207,7 +207,6 @@ const Home = () => {
                 id="product"
                 value={selectedProduct}
                 onChange={(event) => {
-                  console.log("Nuevo valor seleccionado:", event.target.value)
                   setSelectedProduct(event.target.value)
                 }}
               >

@@ -35,7 +35,6 @@ const Codigos = () => {
     }, [])
 
     const handleActivateClick = async (itemData) => {
-      console.log(itemData)
 
       const data = {
         ...itemData,
@@ -74,7 +73,6 @@ const Codigos = () => {
           })
 
         }
-        console.log("Datos actualizados con éxito", response)
       } catch (error) {
         // Manejar errores aquí
         console.error("Error al actualizar los datos", error)
@@ -101,12 +99,19 @@ const Codigos = () => {
     )
 
     const actionBody = (rowData) => {
+      // Obtener la fecha actual en el formato adecuado
+      const currentDate = new Date().toISOString().split('T')[0]
+
+      // Comprobar si date_exp está vacío o es mayor a la fecha actual
+      const isExpired = rowData.date_exp && (rowData.date_exp > currentDate)
+
       return (
         <div>
           <button 
             type="button" 
             className="btn btn-primary"
             onClick={() => handleActivateClick(rowData)}
+            disabled={isExpired} // Desactivar el botón si la fecha ha expirado
           >
             Activar
           </button>
