@@ -27,6 +27,8 @@ const Login = () => {
   const [name, setName] = useState('')
   const [password, setPassword] = useState("")
   const [error, setError] = useState("")
+  const [errorName, setErrorName] = useState("")
+  const [passwordChangeError, setPasswordChangeError] = useState("")
   const [newPassword, setNewPassword] = useState('')
   const [showModal, setShowModal] = useState(false)
   const [cognitoUser, setCognitoUser] = useState(null)
@@ -36,6 +38,11 @@ const Login = () => {
   const source = require(`@src/assets/images/pages/${illustration}`).default
 
   const handleNewPassword = () => {
+    if (!name.trim()) {
+      setErrorName("Por favor, ingresa tu nombre.")
+      return
+    }
+    setErrorName("")
     const updatedUserAttributes = {
       ...userAttributes,
       name
@@ -65,7 +72,7 @@ const Login = () => {
       },
       onFailure: (err) => {
         console.error(err)
-        setError('Error al cambiar la contraseña')
+        setPasswordChangeError(err.message || 'Error al cambiar la contraseña')
       }
     })
   }
@@ -196,7 +203,11 @@ const Login = () => {
             }
           }}
         />
-
+          {errorName && (
+            <div style={{ color: "red" }} className="px-3">
+              <p>{errorName}</p>
+            </div>
+          )}
           <p>Por favor, ingresa tu nueva contraseña.</p>
           <InputPasswordToggle
                   className="input-group-merge"
@@ -212,13 +223,16 @@ const Login = () => {
                   }}
                 />
         </ModalBody>
+        {passwordChangeError && (
+            <div style={{ color: "red" }} className="px-3">
+              <p>Debe contener un mínimo de 8 caracteres, 1 número, 1 letra minúscula, 1 letra mayúscula y 1 carácter especial</p>
+            </div>
+          )}
         <ModalFooter>
           <Button color="primary" onClick={handleNewPassword}>Actualizar Contraseña</Button>
           <Button color="secondary" onClick={() => setShowModal(false)}>Cancelar</Button>
         </ModalFooter>
       </Modal>
-
-
     </div>
   )
 }
