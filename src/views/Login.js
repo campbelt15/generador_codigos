@@ -47,11 +47,20 @@ const Login = () => {
     // Otros atributos de solo lectura pueden ser eliminados aquí si es necesario
   
     cognitoUser.completeNewPasswordChallenge(newPassword, updatedUserAttributes, {
-      onSuccess: (session) => {
+      onSuccess: async (session) => {
         setShowModal(false)
         localStorage.setItem('sessionToken', session.getIdToken().getJwtToken())
         localStorage.setItem('userEmail', email)
         localStorage.setItem('userName', name)
+
+        const ipCliente = await ObtenerIP() 
+
+        await UserLogs('Login', 'Login', ipCliente, email)
+
+        if (ipCliente) {
+          localStorage.setItem('userIP', ipCliente) 
+        }
+
         navigate('/home')
       },
       onFailure: (err) => {
@@ -173,13 +182,21 @@ const Login = () => {
       <Modal isOpen={showModal} toggle={() => setShowModal(false)}>
         <ModalHeader toggle={() => setShowModal(false)}>Cambio de Contraseña Requerido</ModalHeader>
         <ModalBody>
-        <p>Por favor, ingresa tu nombre y nueva contraseña.</p>
+        <p>Por favor, ingresa tu nombre.</p>
         <Input
           type="text"
           placeholder="Nombre"
           value={name}
-          onChange={(e) => setName(e.target.value)}
+          onChange={(e) => {
+            const input = e.target.value
+            // Esta expresión regular permite letras y espacios
+            const regex = /^[a-zA-Z ]*$/
+            if (regex.test(input)) {
+              setName(input)
+            }
+          }}
         />
+
           <p>Por favor, ingresa tu nueva contraseña.</p>
           <InputPasswordToggle
                   className="input-group-merge"
