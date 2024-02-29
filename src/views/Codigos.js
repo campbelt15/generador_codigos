@@ -8,6 +8,7 @@ import { InputText } from 'primereact/inputtext'
 
 const Codigos = () => {
     const reactivateApi = process.env.REACT_APP_REACTIVATE_API
+    const listarCodigosApi = process.env.REACT_APP_LISTAR_CODIGOS_API
     const [isLoading, setIsLoading] = useState(true)
     const [data, setData] = useState([])
     const [globalFilter, setGlobalFilter] = useState(null)
@@ -15,7 +16,7 @@ const Codigos = () => {
     const userIP = localStorage.getItem('userIP')
 
     const loadData = () => {
-      fetch('https://vbfz5r6da3.execute-api.us-east-1.amazonaws.com/dev/obtener_lista_codigos')
+      fetch(listarCodigosApi)
         .then(response => response.json())
         .then(data => {
           const responseBody = JSON.parse(data.body)
