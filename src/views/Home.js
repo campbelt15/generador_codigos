@@ -63,7 +63,7 @@ const Home = () => {
 
       const data = {
         nombre,
-        telefono,
+        telefono: `+502${telefono}`,
         producto: selectedProduct,
         ip: userIP,
         responsable: userEmail
@@ -88,7 +88,7 @@ const Home = () => {
         
           const smsData = {
             message: `Código de suscripción: ${responseBody.codigo}`,
-            phone_number: `+502${telefono}`
+            phone_number: telefono
           }
           
           const smsResponse = await fetch(
