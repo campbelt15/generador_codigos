@@ -88,7 +88,7 @@ const Home = () => {
         
           const smsData = {
             message: `Código de suscripción: ${responseBody.codigo}`,
-            phone_number: telefono
+            phone_number: `+502${telefono}`
           }
           
           const smsResponse = await fetch(
