@@ -12,6 +12,7 @@ import PublicRoute from "@components/routes/PublicRoute"
 
 // ** Utils
 import { isObjEmpty } from "@utils"
+import Anulaciones from "../../views/Anulaciones"
 
 const getLayout = {
   blank: <BlankLayout />,
@@ -48,6 +49,10 @@ const Routes = [
   {
     path: "/codigos",
     element: <Codigos />
+  },
+  {
+    path: "/anulaciones",
+    element: <Anulaciones />
   },
   {
     path: "/usuario",
