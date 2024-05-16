@@ -10,6 +10,7 @@ const Anulaciones = () => {
   const [transaccionObtenida, setTransaccionObtenida] = useState({})
   const [error, setError] = useState(false)
 
+
   const transaccionAPI = 'https://e7sffoygdj.execute-api.us-east-1.amazonaws.com/dev/anulacion/obtener'
 
   const formatFecha = (fecha) => {
@@ -89,6 +90,74 @@ const Anulaciones = () => {
         })
       }
     }
+  }
+
+  const handleSubmitAnulation = async (event) => {
+    event.preventDefault()
+
+    const payload = {
+      TraceNo: transaccionObtenida.systems_trace_no,
+      MessageTypeId:"0200", 
+      ProcCode:"020000", 
+      Type:"", 
+      PrimaryNum:"", 
+      DateExp:"", 
+      CVV:"", 
+      Amount:""
+    }
+
+    try {
+      const response = await fetch('https://vbfz5r6da3.execute-api.us-east-1.amazonaws.com/dev/payment-neonet', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload)
+      })
+    
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+    
+      const responseData = await response.json()
+      console.log('Correcto')
+      console.log('Response:', responseData)
+      const dataAnulacion = {
+        id: transaccionObtenida.id,
+        cognito_id:transaccionObtenida.cognito_id, 
+        status:"Anulado", 
+        ingreso:"0200", 
+        proceso:"020000", 
+        retrievalrefno:transaccionObtenida.retrievalrefno, 
+        responsecode:transaccionObtenida.responsecode, 
+        data:responseData
+      }
+
+      try {
+          const responseDynamo = await fetch('https://e7sffoygdj.execute-api.us-east-1.amazonaws.com/dev/anulacion', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(dataAnulacion)
+        })
+      
+        if (!responseDynamo.ok) {
+          throw new Error(`HTTP error! status: ${responseDynamo.status}`)
+        }
+
+        console.log(responseDynamo)
+        setIsLoading(true)
+          
+        } catch (error) {
+          console.error('Error:', error)
+        }
+
+
+    } catch (error) {
+      console.error('Error:', error)
+    }
+    
   }
   
   
@@ -175,7 +244,7 @@ const Anulaciones = () => {
                   <CardTitle>Transacción obtenida:</CardTitle>
                 </CardHeader>
                 <CardBody>
-                  <form>
+                  <form className="mt-2" onSubmit={handleSubmitAnulation}>
                   <div className="row mb-1">
                       <div className="col">
                       <Label className="form-label" for="retrievalrefno">
@@ -250,6 +319,21 @@ const Anulaciones = () => {
                       <Input type="text" id="codigo" value={transaccionObtenida.codigo} readOnly />
                       </div>
                     </div>
+
+                    <div className="row mb-1">
+                      <div className="col">
+                      <Label className="form-label" for="nit">
+                        Estatus
+                      </Label>
+                      <Input type="text" id="nit" value={transaccionObtenida.status} readOnly />
+                      </div>
+                      <div className="col">
+
+                      </div>
+                    </div>
+                    <Button color="warning" block>
+                      Anular
+                    </Button>
                   </form>
                 </CardBody>
               </Card>
