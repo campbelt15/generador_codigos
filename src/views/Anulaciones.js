@@ -1,22 +1,48 @@
-import React, { useState} from 'react'
+import React, { useState, useEffect} from 'react'
 import { Card, CardHeader, CardBody, CardTitle, Label, Input, Button } from 'reactstrap'
 import swal from 'sweetalert'
 
 const Anulaciones = () => {
-  const [isLoading, setIsLoading] = useState(true)
+  const [isLoading, setIsLoading] = useState(false)
   const [telefono, setTelefono] = useState('')
   const [noTransaccion, setNoTransaccion] = useState('')
   const [fecha, setFecha] = useState('')
+  const [motivo, setMotivo] = useState('duplicidad')
+  const [descripcion, setDescripcion] = useState('')
   const [transaccionObtenida, setTransaccionObtenida] = useState({})
   const [error, setError] = useState(false)
 
 
   const transaccionAPI = 'https://e7sffoygdj.execute-api.us-east-1.amazonaws.com/dev/anulacion/obtener'
 
+  useEffect(() => {
+    if (transaccionObtenida.motivo !== undefined) {
+      setMotivo(transaccionObtenida.motivo || 'duplicidad')
+    }
+    if (transaccionObtenida.descripcion !== undefined) {
+      setDescripcion(transaccionObtenida.descripcion || '')
+    }
+  }, [transaccionObtenida])
+  
+
   const formatFecha = (fecha) => {
     const date = new Date(fecha)
     return date.toISOString().split('T')[0]
   }
+
+  const restarDosDias = (fecha) => {
+    const date = new Date(fecha)
+    date.setDate(date.getDate() - 2) // Resta dos días
+    return date.toISOString().split('T')[0]
+  }  
+
+  const isAnularDisabled = () => {
+    const status = transaccionObtenida.status
+    const fechaTransaccion = new Date(transaccionObtenida.fecha)
+    const fechaLimite = new Date(restarDosDias(new Date()))
+    return status === 'Anulado' || fechaTransaccion < fechaLimite
+  }
+  
 
   const handleSubmit = async (event) => {
     event.preventDefault()
@@ -25,6 +51,7 @@ const Anulaciones = () => {
       setError(true)
     } else {
       setError(false)
+      setIsLoading(true)
   
       const formattedFecha = formatFecha(fecha)
       const data = {
@@ -44,30 +71,29 @@ const Anulaciones = () => {
   
         if (response.ok) {
           const responseData = await response.json()
-          setIsLoading(false)
   
           // Verifica si responseData.body es una cadena y parsea si es necesario
-          const bodyData = typeof responseData.body === 'string' ? JSON.parse(responseData.body) : responseData.body
+          const bodyData = responseData.body ? (typeof responseData.body === 'string' ? JSON.parse(responseData.body) : responseData.body) : {}
   
-          if (Array.isArray(bodyData.data)) {
-            // Filtra los datos para excluir el campo "data"
-            const filteredData = bodyData.data.map(item => {
-              const { data, ...filteredItem } = item
-              console.log(data) // Aquí puedes procesar los datos específicos dentro del campo "data"
-              const parsedData = JSON.parse(data)
-              console.log('Parsed data:', parsedData)
-              return { ...filteredItem, parsedData }
-            })
-            setTransaccionObtenida(filteredData[0]) // Asume que solo hay un objeto en el array
+          console.log(bodyData)
+  
+          if (bodyData && typeof bodyData === 'object') {
+            // Si bodyData es un objeto, asignarlo directamente
+            const { data, ...filteredItem } = bodyData
+            const parsedData = data && data.body ? JSON.parse(data.body) : {}
+            setTransaccionObtenida({ ...filteredItem, parsedData })
+            setIsLoading(false)
           } else {
-            console.error('bodyData.data is not an array:', bodyData.data)
+            console.error('bodyData is not a valid object:', bodyData)
+  
             swal({
               title: 'Error en la solicitud',
-              text: 'La respuesta del servidor no es un array.',
+              text: 'No se encontró la transacción.',
               icon: 'warning',
               button: 'OK',
               timer: '3000'
             })
+            setIsLoading(false)
           }
         } else {
           const errorResponse = await response.json()
@@ -79,6 +105,7 @@ const Anulaciones = () => {
             button: 'OK',
             timer: '3000'
           })
+          setIsLoading(false)
         }
       } catch (error) {
         swal({
@@ -88,94 +115,106 @@ const Anulaciones = () => {
           button: 'OK',
           timer: '3000'
         })
+        setIsLoading(false)
       }
     }
   }
-
+  
+  
   const handleSubmitAnulation = async (event) => {
     event.preventDefault()
 
-    const payload = {
-      TraceNo: transaccionObtenida.systems_trace_no,
-      MessageTypeId:"0200", 
-      ProcCode:"020000", 
-      Type:"", 
-      PrimaryNum:"", 
-      DateExp:"", 
-      CVV:"", 
-      Amount:""
-    }
+    if ([descripcion].includes('')) {
+      setError(true)
+    } else {
+      setError(false)
 
-    try {
-      const response = await fetch('https://vbfz5r6da3.execute-api.us-east-1.amazonaws.com/dev/payment-neonet', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(payload)
-      })
-    
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
+      const payload = {
+        TraceNo: transaccionObtenida.systems_trace_no,
+        MessageTypeId:"0200", 
+        ProcCode:"020000", 
+        Type:"", 
+        PrimaryNum:"", 
+        DateExp:"", 
+        CVV:"", 
+        Amount:""
       }
-    
-      const responseData = await response.json()
-      console.log('Correcto')
-      console.log('Response:', responseData)
-      const dataAnulacion = {
-        id: transaccionObtenida.id,
-        cognito_id:transaccionObtenida.cognito_id, 
-        status:"Anulado", 
-        ingreso:"0200", 
-        proceso:"020000", 
-        retrievalrefno:transaccionObtenida.retrievalrefno, 
-        responsecode:transaccionObtenida.responsecode, 
-        data:responseData
-      }
-
+  
       try {
-          const responseDynamo = await fetch('https://e7sffoygdj.execute-api.us-east-1.amazonaws.com/dev/anulacion', {
+        const response = await fetch('https://vbfz5r6da3.execute-api.us-east-1.amazonaws.com/dev/payment-neonet', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify(dataAnulacion)
+          body: JSON.stringify(payload)
         })
       
-        if (!responseDynamo.ok) {
-          throw new Error(`HTTP error! status: ${responseDynamo.status}`)
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`)
         }
-
-        console.log(responseDynamo)
-        setIsLoading(true)
-          
-        } catch (error) {
-          console.error('Error:', error)
+      
+        const responseData = await response.json()
+        console.log('Correcto')
+        console.log('Response:', responseData)
+        const dataAnulacion = {
+          id: transaccionObtenida.id,
+          cognito_id:transaccionObtenida.cognito_id, 
+          status:"Anulado", 
+          ingreso:"0200", 
+          proceso:"020000", 
+          retrievalrefno:transaccionObtenida.retrievalrefno, 
+          responsecode:transaccionObtenida.responsecode, 
+          data:responseData,
+          motivo,
+          descripcion
         }
-
-
-    } catch (error) {
-      console.error('Error:', error)
+  
+        try {
+            const responseDynamo = await fetch('https://e7sffoygdj.execute-api.us-east-1.amazonaws.com/dev/anulacion', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(dataAnulacion)
+          })
+        
+          if (!responseDynamo.ok) {
+            throw new Error(`HTTP error! status: ${responseDynamo.status}`)
+          }
+  
+          console.log(responseDynamo)
+          setIsLoading(true)
+            
+          } catch (error) {
+            console.error('Error:', error)
+          }
+  
+  
+      } catch (error) {
+        console.error('Error:', error)
+      }
     }
-    
   }
   
   
   return (
     <>
+    {error && (
+                  <p className="alert alert-danger text-center">
+                    Todos los campos son obligatorios
+                  </p>
+                )}
       <div style={{ display: 'flex' }}>
+      
         <div style={{ flex: 1 }}>
+        
           <Card>
             <CardHeader style={{ backgroundColor: '#1274c5', color: '#fff' }}>
               <CardTitle>Usuario de servicio al cliente</CardTitle>
             </CardHeader>
             <CardBody>
               <form className="mt-2" onSubmit={handleSubmit}>
-                {error && (
-                  <p className="alert alert-danger text-center">
-                    Todos los campos son obligatorios
-                  </p>
-                )}
+                
                 <div className="mb-1">
                   <Label className="form-label" for="tel_number">
                     Número de teléfono
@@ -245,6 +284,41 @@ const Anulaciones = () => {
                 </CardHeader>
                 <CardBody>
                   <form className="mt-2" onSubmit={handleSubmitAnulation}>
+                  <div className="row mb-1">
+                      <div className="col">
+                      <Label className="form-label" for="status">
+                        Estatus
+                      </Label>
+                      <Input type="text" id="status" value={transaccionObtenida.status} readOnly />
+                      </div>
+               
+                      <div className="col">
+                        <Label className="form-label" for="motivo">
+                          Motivo de anulación
+                        </Label>
+                        <Input 
+                          type="select" 
+                          id="motivo" 
+                          value={motivo} 
+                          onChange={(e) => setMotivo(e.target.value)}
+                        >
+                          <option value="duplicidad">Duplicidad de compra</option>
+                          <option value="insatisfaccion">Insatisfacción con el servicio</option>
+                        </Input>
+                      </div>
+                  </div>
+
+                  <div className="row mb-1">
+                      <div className="col">
+                      <Label className="form-label" for="descripcion">
+                        Descripción
+                      </Label>
+                      <Input type="text" id="descripcion" value={descripcion} 
+                          onChange={(e) => setDescripcion(e.target.value)} />
+                      </div>
+
+                  </div>
+
                   <div className="row mb-1">
                       <div className="col">
                       <Label className="form-label" for="retrievalrefno">
@@ -320,20 +394,11 @@ const Anulaciones = () => {
                       </div>
                     </div>
 
-                    <div className="row mb-1">
-                      <div className="col">
-                      <Label className="form-label" for="nit">
-                        Estatus
-                      </Label>
-                      <Input type="text" id="nit" value={transaccionObtenida.status} readOnly />
-                      </div>
-                      <div className="col">
-
-                      </div>
-                    </div>
-                    <Button color="warning" block>
+                    
+                    <Button color="warning" block disabled={isAnularDisabled()}>
                       Anular
                     </Button>
+
                   </form>
                 </CardBody>
               </Card>
