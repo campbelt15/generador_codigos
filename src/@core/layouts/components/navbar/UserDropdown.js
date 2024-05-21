@@ -45,7 +45,7 @@ const UserDropdown = () => {
   const handleLogout = () => {
     const cognitoUser = UserPool.getCurrentUser()
     
-    UserLogs('Logout', 'Logout', userIP, userEmail)
+    UserLogs('Logout', '', 'Logout', userIP, userEmail)
 
     if (cognitoUser) {
       cognitoUser.signOut() // Cierra la sesión del usuario

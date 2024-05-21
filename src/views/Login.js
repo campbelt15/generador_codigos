@@ -62,7 +62,7 @@ const Login = () => {
 
         const ipCliente = await ObtenerIP() 
 
-        await UserLogs('Login', 'Login', ipCliente, email)
+        await UserLogs('Login', '', 'Login', ipCliente, email)
 
         if (ipCliente) {
           localStorage.setItem('userIP', ipCliente) 
@@ -106,7 +106,7 @@ const Login = () => {
 
         const ipCliente = await ObtenerIP() 
 
-        await UserLogs('Login', 'Login', ipCliente, email)
+        await UserLogs('Login', '', 'Login', ipCliente, email)
 
         if (ipCliente) {
           localStorage.setItem('userIP', ipCliente) 

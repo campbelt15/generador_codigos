@@ -2,6 +2,8 @@ import React, { useState, useEffect} from 'react'
 import { Card, CardHeader, CardBody, CardTitle, Label, Input, Button } from 'reactstrap'
 import swal from 'sweetalert'
 
+import UserLogs from "../@core/components/logs_user/UserLogs"
+
 const Anulaciones = () => {
   const [isLoading, setIsLoading] = useState(false)
   const [telefono, setTelefono] = useState('')
@@ -12,6 +14,8 @@ const Anulaciones = () => {
   const [transaccionObtenida, setTransaccionObtenida] = useState({})
   const [error, setError] = useState(false)
 
+  const userEmail = localStorage.getItem('userEmail')
+  const userIP = localStorage.getItem('userIP')
 
   const transaccionAPI = 'https://e7sffoygdj.execute-api.us-east-1.amazonaws.com/dev/anulacion/obtener'
 
@@ -42,24 +46,40 @@ const Anulaciones = () => {
     const fechaLimite = new Date(restarDosDias(new Date()))
     return status === 'Anulado' || fechaTransaccion < fechaLimite
   }
-  
 
+  const resetFormulario = () => {
+    setTelefono('')
+    setNoTransaccion('')
+    setFecha('')
+    setMotivo('duplicidad')
+    setDescripcion('')
+    setTransaccionObtenida({})
+    console.log('Formulario reseteado:', {
+      telefono: '',
+      noTransaccion: '',
+      fecha: '',
+      motivo: 'duplicidad',
+      descripcion: '',
+      transaccionObtenida: {}
+    })
+  }
+  
   const handleSubmit = async (event) => {
     event.preventDefault()
-  
+
     if ([noTransaccion, telefono, fecha].includes('')) {
       setError(true)
     } else {
       setError(false)
       setIsLoading(true)
-  
+
       const formattedFecha = formatFecha(fecha)
       const data = {
         noTransaccion,
         telefono: `+502${telefono}`,
         fecha: formattedFecha
       }
-  
+
       try {
         const response = await fetch(transaccionAPI, {
           method: 'POST',
@@ -68,32 +88,50 @@ const Anulaciones = () => {
           },
           body: JSON.stringify(data)
         })
-  
+
         if (response.ok) {
           const responseData = await response.json()
-  
+
           // Verifica si responseData.body es una cadena y parsea si es necesario
           const bodyData = responseData.body ? (typeof responseData.body === 'string' ? JSON.parse(responseData.body) : responseData.body) : {}
-  
+
+          console.log("bodyData: ")
           console.log(bodyData)
-  
+
           if (bodyData && typeof bodyData === 'object') {
-            // Si bodyData es un objeto, asignarlo directamente
-            const { data, ...filteredItem } = bodyData
-            const parsedData = data && data.body ? JSON.parse(data.body) : {}
-            setTransaccionObtenida({ ...filteredItem, parsedData })
-            setIsLoading(false)
+            console.log('dentro del if')
+
+            if (bodyData.message) {
+              console.log(bodyData.message)
+              swal({
+                title: 'Error en la solicitud',
+                text: 'No se encontró la transacción.',
+                icon: 'warning',
+                button: 'OK',
+                timer: 3000
+              })
+              setTransaccionObtenida({})
+              setDescripcion('')
+              setMotivo('duplicidad')
+              setIsLoading(false)
+            } else {
+              // Si bodyData es un objeto, asignarlo directamente
+              const { data, ...filteredItem } = bodyData
+              const parsedData = data && data.body ? JSON.parse(data.body) : {}
+              setTransaccionObtenida({ ...filteredItem, parsedData })
+              
+            }
           } else {
             console.error('bodyData is not a valid object:', bodyData)
-  
+
             swal({
               title: 'Error en la solicitud',
               text: 'No se encontró la transacción.',
               icon: 'warning',
               button: 'OK',
-              timer: '3000'
+              timer: 3000
             })
-            setIsLoading(false)
+           
           }
         } else {
           const errorResponse = await response.json()
@@ -103,9 +141,9 @@ const Anulaciones = () => {
             text: errorResponse.message || response.statusText,
             icon: 'warning',
             button: 'OK',
-            timer: '3000'
+            timer: 3000
           })
-          setIsLoading(false)
+          
         }
       } catch (error) {
         swal({
@@ -113,13 +151,13 @@ const Anulaciones = () => {
           text: error.message,
           icon: 'error',
           button: 'OK',
-          timer: '3000'
+          timer: 3000
         })
-        setIsLoading(false)
+        
       }
+      setIsLoading(false)
     }
-  }
-  
+  }  
   
   const handleSubmitAnulation = async (event) => {
     event.preventDefault()
@@ -154,48 +192,94 @@ const Anulaciones = () => {
         }
       
         const responseData = await response.json()
-        console.log('Correcto')
-        console.log('Response:', responseData)
-        const dataAnulacion = {
-          id: transaccionObtenida.id,
-          cognito_id:transaccionObtenida.cognito_id, 
-          status:"Anulado", 
-          ingreso:"0200", 
-          proceso:"020000", 
-          retrievalrefno:transaccionObtenida.retrievalrefno, 
-          responsecode:transaccionObtenida.responsecode, 
-          data:responseData,
-          motivo,
-          descripcion
-        }
-  
-        try {
-            const responseDynamo = await fetch('https://e7sffoygdj.execute-api.us-east-1.amazonaws.com/dev/anulacion', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(dataAnulacion)
-          })
-        
-          if (!responseDynamo.ok) {
-            throw new Error(`HTTP error! status: ${responseDynamo.status}`)
+
+        // Parsear la cadena JSON en el campo 'body'
+        const bodyData = JSON.parse(responseData.body)
+
+        // Acceder a elementos específicos
+        const ResponseCode = bodyData.ResponseCode
+
+        console.log('ResponseCode:', ResponseCode)
+
+        if (ResponseCode === "00" || ResponseCode === "10") {
+          console.log("Dentro del if ResponseCode")
+          const dataAnulacion = {
+            id: transaccionObtenida.id,
+            cognito_id:transaccionObtenida.cognito_id, 
+            status:"Anulado", 
+            ingreso:"0200", 
+            proceso:"020000", 
+            retrievalrefno:transaccionObtenida.retrievalrefno, 
+            responsecode:transaccionObtenida.responsecode, 
+            data:responseData,
+            motivo,
+            descripcion
           }
-  
-          console.log(responseDynamo)
-          setIsLoading(true)
+    
+          try {
+              const responseDynamo = await fetch('https://e7sffoygdj.execute-api.us-east-1.amazonaws.com/dev/anulacion', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(dataAnulacion)
+              })
             
-          } catch (error) {
-            console.error('Error:', error)
-          }
-  
-  
+              if (!responseDynamo.ok) {
+                throw new Error(`HTTP error! status: ${responseDynamo.status}`)
+              } 
+
+              console.log('se ingreso la anulacion en Dynamo')
+              console.log('Aca debe ir el swal notificando que la transaccion de anulacion es exitosa')
+
+              swal({
+                title: "Anulado",
+                text: "Anulación realizada correctamente.",
+                icon: "success",
+                button: "OK",
+                timer: "3000"
+              })
+
+              await UserLogs('Anulacion', transaccionObtenida.codigo, 'Anulacion', userIP, userEmail)
+              console.log('resetFormulario Inicio')
+              resetFormulario()
+              console.log('resetFormulario Fin')
+              setIsLoading(false)
+            } catch (error) {
+              console.error('Error:', error)
+              swal({
+                title: "Error",
+                text: "Error en la solicitud",
+                icon: error,
+                button: "OK",
+                timer: "3000"
+              })
+            }
+        } else {
+          console.log("Error la respuesta es diferente a 00 o 10")
+          console.log('Aca debe ir el swal notificando que la transaccion de no fue exitosa')
+
+          swal({
+            title: "Error",
+            text: "Error en la solicitud",
+            icon: "warning",
+            button: "OK",
+            timer: "3000"
+          })
+        } 
       } catch (error) {
         console.error('Error:', error)
+        swal({
+          title: "Error",
+          text: "Error en la solicitud",
+          icon: error,
+          button: "OK",
+          timer: "3000"
+        })
       }
     }
+    setIsLoading(false)
   }
-  
   
   return (
     <>
@@ -289,7 +373,7 @@ const Anulaciones = () => {
                       <Label className="form-label" for="status">
                         Estatus
                       </Label>
-                      <Input type="text" id="status" value={transaccionObtenida.status} readOnly />
+                      <Input type="text" id="status" value={transaccionObtenida.status || ''} readOnly />
                       </div>
                
                       <div className="col">
@@ -324,13 +408,13 @@ const Anulaciones = () => {
                       <Label className="form-label" for="retrievalrefno">
                       No. Transaccion
                         </Label>
-                        <Input type="text" id="retrievalrefno" value={transaccionObtenida.retrievalrefno} readOnly />
+                        <Input type="text" id="retrievalrefno" value={transaccionObtenida.retrievalrefno || ''} readOnly />
                       </div>
                       <div className="col">
                       <Label className="form-label" for="systems_trace_no">
                         No. Auditoria
                       </Label>
-                      <Input type="text" id="systems_trace_no" value={transaccionObtenida.systems_trace_no} readOnly />
+                      <Input type="text" id="systems_trace_no" value={transaccionObtenida.systems_trace_no || ''} readOnly />
                       </div>
                     </div>
 
@@ -339,13 +423,13 @@ const Anulaciones = () => {
                       <Label className="form-label" for="name">
                         Nombre
                       </Label>
-                      <Input type="text" id="name" value={transaccionObtenida.name} readOnly />
+                      <Input type="text" id="name" value={transaccionObtenida.name || ''} readOnly />
                       </div>
                       <div className="col">
                       <Label className="form-label" for="email">
                         Email
                       </Label>
-                      <Input type="text" id="email" value={transaccionObtenida.email} readOnly />
+                      <Input type="text" id="email" value={transaccionObtenida.email || ''} readOnly />
                       </div>
                     </div>
 
@@ -354,13 +438,13 @@ const Anulaciones = () => {
                         <Label className="form-label" for="fecha">
                           Fecha
                         </Label>
-                        <Input type="text" id="fecha" value={transaccionObtenida.fecha} readOnly />
+                        <Input type="text" id="fecha" value={transaccionObtenida.fecha || ''} readOnly />
                       </div>
                       <div className="col">
                       <Label className="form-label" for="phone_number">
                         Número de teléfono
                       </Label>
-                      <Input type="text" id="phone_number" value={transaccionObtenida.phone_number} readOnly />
+                      <Input type="text" id="phone_number" value={transaccionObtenida.phone_number || ''} readOnly />
                       </div>
                     </div>
 
@@ -369,13 +453,13 @@ const Anulaciones = () => {
                       <Label className="form-label" for="product">
                         Producto
                       </Label>
-                      <Input type="text" id="product" value={transaccionObtenida.product} readOnly />
+                      <Input type="text" id="product" value={transaccionObtenida.product || ''} readOnly />
                       </div>
                       <div className="col">
                       <Label className="form-label" for="price">
                         Precio
                       </Label>
-                      <Input type="text" id="price" value={transaccionObtenida.price} readOnly />
+                      <Input type="text" id="price" value={transaccionObtenida.price || ''} readOnly />
                       </div>
                     </div>
 
@@ -384,13 +468,13 @@ const Anulaciones = () => {
                       <Label className="form-label" for="nit">
                         NIT
                       </Label>
-                      <Input type="text" id="nit" value={transaccionObtenida.nit} readOnly />
+                      <Input type="text" id="nit" value={transaccionObtenida.nit || ''} readOnly />
                       </div>
                       <div className="col">
                       <Label className="form-label" for="codigo">
                         Código
                       </Label>
-                      <Input type="text" id="codigo" value={transaccionObtenida.codigo} readOnly />
+                      <Input type="text" id="codigo" value={transaccionObtenida.codigo || ''} readOnly />
                       </div>
                     </div>
 
