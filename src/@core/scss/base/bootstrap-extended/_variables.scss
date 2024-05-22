@@ -29,9 +29,11 @@ $green: #28c76f !default; //$success
 $blue: #00cfe8 !default; //$info
 $orange: #ff9f43 !default; //$warning
 $red: #ea5455 !default; //$danger
+$blue_diario: #4F96D4 !default; //$Azul Nuestro Diario
+$yellow: #FFF200 !default; //Amarillo Nuestro Diario
 
-$primary: $purple !default;
-$secondary: #82868b !default;
+$primary: $blue_diario !default;
+$secondary: $yellow !default;
 $success: $green !default;
 $danger: $red !default;
 $info: $blue !default;

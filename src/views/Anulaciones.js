@@ -54,14 +54,6 @@ const Anulaciones = () => {
     setMotivo('duplicidad')
     setDescripcion('')
     setTransaccionObtenida({})
-    console.log('Formulario reseteado:', {
-      telefono: '',
-      noTransaccion: '',
-      fecha: '',
-      motivo: 'duplicidad',
-      descripcion: '',
-      transaccionObtenida: {}
-    })
   }
   
   const handleSubmit = async (event) => {
@@ -164,59 +156,69 @@ const Anulaciones = () => {
 
     if ([descripcion].includes('')) {
       setError(true)
-    } else {
-      setError(false)
+      return
+    }
 
-      const payload = {
-        TraceNo: transaccionObtenida.systems_trace_no,
-        MessageTypeId:"0200", 
-        ProcCode:"020000", 
-        Type:"", 
-        PrimaryNum:"", 
-        DateExp:"", 
-        CVV:"", 
-        Amount:""
-      }
-  
-      try {
-        const response = await fetch('https://vbfz5r6da3.execute-api.us-east-1.amazonaws.com/dev/payment-neonet', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(payload)
-        })
-      
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`)
+    setError(false)
+
+    swal({
+      title: "Confirmar Anulación",
+      text: "¿Estás seguro de que deseas anular esta transacción?",
+      icon: "warning",
+      buttons: true,
+      dangerMode: true
+    }).then(async (willDelete) => {
+      if (willDelete) {
+        const payload = {
+          TraceNo: transaccionObtenida.systems_trace_no,
+          MessageTypeId: "0200",
+          ProcCode: "020000",
+          Type: "",
+          PrimaryNum: "",
+          DateExp: "",
+          CVV: "",
+          Amount: ""
         }
-      
-        const responseData = await response.json()
 
-        // Parsear la cadena JSON en el campo 'body'
-        const bodyData = JSON.parse(responseData.body)
+        try {
+          const response = await fetch('https://vbfz5r6da3.execute-api.us-east-1.amazonaws.com/dev/payment-neonet', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+          })
 
-        // Acceder a elementos específicos
-        const ResponseCode = bodyData.ResponseCode
-
-        console.log('ResponseCode:', ResponseCode)
-
-        if (ResponseCode === "00" || ResponseCode === "10") {
-          console.log("Dentro del if ResponseCode")
-          const dataAnulacion = {
-            id: transaccionObtenida.id,
-            cognito_id:transaccionObtenida.cognito_id, 
-            status:"Anulado", 
-            ingreso:"0200", 
-            proceso:"020000", 
-            retrievalrefno:transaccionObtenida.retrievalrefno, 
-            responsecode:transaccionObtenida.responsecode, 
-            data:responseData,
-            motivo,
-            descripcion
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`)
           }
-    
-          try {
+
+          const responseData = await response.json()
+
+          // Parsear la cadena JSON en el campo 'body'
+          const bodyData = JSON.parse(responseData.body)
+
+          // Acceder a elementos específicos
+          const ResponseCode = bodyData.ResponseCode
+
+          console.log('ResponseCode:', ResponseCode)
+
+          if (ResponseCode === "00" || ResponseCode === "10") {
+            console.log("Dentro del if ResponseCode")
+            const dataAnulacion = {
+              id: transaccionObtenida.id,
+              cognito_id: transaccionObtenida.cognito_id,
+              status: "Anulado",
+              ingreso: "0200",
+              proceso: "020000",
+              retrievalrefno: transaccionObtenida.retrievalrefno,
+              responsecode: transaccionObtenida.responsecode,
+              data: responseData,
+              motivo,
+              descripcion
+            }
+
+            try {
               const responseDynamo = await fetch('https://e7sffoygdj.execute-api.us-east-1.amazonaws.com/dev/anulacion', {
                 method: 'POST',
                 headers: {
@@ -224,10 +226,10 @@ const Anulaciones = () => {
                 },
                 body: JSON.stringify(dataAnulacion)
               })
-            
+
               if (!responseDynamo.ok) {
                 throw new Error(`HTTP error! status: ${responseDynamo.status}`)
-              } 
+              }
 
               console.log('se ingreso la anulacion en Dynamo')
               console.log('Aca debe ir el swal notificando que la transaccion de anulacion es exitosa')
@@ -237,7 +239,7 @@ const Anulaciones = () => {
                 text: "Anulación realizada correctamente.",
                 icon: "success",
                 button: "OK",
-                timer: "3000"
+                timer: 3000
               })
 
               await UserLogs('Anulacion', transaccionObtenida.codigo, 'Anulacion', userIP, userEmail)
@@ -250,35 +252,37 @@ const Anulaciones = () => {
               swal({
                 title: "Error",
                 text: "Error en la solicitud",
-                icon: error,
+                icon: "error",
                 button: "OK",
-                timer: "3000"
+                timer: 3000
               })
             }
-        } else {
-          console.log("Error la respuesta es diferente a 00 o 10")
-          console.log('Aca debe ir el swal notificando que la transaccion de no fue exitosa')
+          } else {
+            console.log("Error la respuesta es diferente a 00 o 10")
+            console.log('Aca debe ir el swal notificando que la transaccion de no fue exitosa')
 
+            swal({
+              title: "Error",
+              text: "Error en la solicitud",
+              icon: "warning",
+              button: "OK",
+              timer: 3000
+            })
+          }
+        } catch (error) {
+          console.error('Error:', error)
           swal({
             title: "Error",
             text: "Error en la solicitud",
-            icon: "warning",
+            icon: "error",
             button: "OK",
-            timer: "3000"
+            timer: 3000
           })
-        } 
-      } catch (error) {
-        console.error('Error:', error)
-        swal({
-          title: "Error",
-          text: "Error en la solicitud",
-          icon: error,
-          button: "OK",
-          timer: "3000"
-        })
+        }
+
+        setIsLoading(false)
       }
-    }
-    setIsLoading(false)
+    })
   }
   
   return (
@@ -288,7 +292,7 @@ const Anulaciones = () => {
                     Todos los campos son obligatorios
                   </p>
                 )}
-      <div style={{ display: 'flex' }}>
+      <div style={{ display: 'flex' }} className="flex-container">
       
         <div style={{ flex: 1 }}>
         
@@ -479,7 +483,7 @@ const Anulaciones = () => {
                     </div>
 
                     
-                    <Button color="warning" block disabled={isAnularDisabled()}>
+                    <Button color="primary" block disabled={isAnularDisabled()}>
                       Anular
                     </Button>
 
