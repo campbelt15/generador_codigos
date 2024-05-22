@@ -87,14 +87,9 @@ const Anulaciones = () => {
           // Verifica si responseData.body es una cadena y parsea si es necesario
           const bodyData = responseData.body ? (typeof responseData.body === 'string' ? JSON.parse(responseData.body) : responseData.body) : {}
 
-          console.log("bodyData: ")
-          console.log(bodyData)
-
           if (bodyData && typeof bodyData === 'object') {
-            console.log('dentro del if')
-
             if (bodyData.message) {
-              console.log(bodyData.message)
+
               swal({
                 title: 'Error en la solicitud',
                 text: 'No se encontró la transacción.',
@@ -201,10 +196,7 @@ const Anulaciones = () => {
           // Acceder a elementos específicos
           const ResponseCode = bodyData.ResponseCode
 
-          console.log('ResponseCode:', ResponseCode)
-
           if (ResponseCode === "00" || ResponseCode === "10") {
-            console.log("Dentro del if ResponseCode")
             const dataAnulacion = {
               id: transaccionObtenida.id,
               cognito_id: transaccionObtenida.cognito_id,
@@ -231,9 +223,6 @@ const Anulaciones = () => {
                 throw new Error(`HTTP error! status: ${responseDynamo.status}`)
               }
 
-              console.log('se ingreso la anulacion en Dynamo')
-              console.log('Aca debe ir el swal notificando que la transaccion de anulacion es exitosa')
-
               swal({
                 title: "Anulado",
                 text: "Anulación realizada correctamente.",
@@ -243,9 +232,8 @@ const Anulaciones = () => {
               })
 
               await UserLogs('Anulacion', transaccionObtenida.codigo, 'Anulacion', userIP, userEmail)
-              console.log('resetFormulario Inicio')
+
               resetFormulario()
-              console.log('resetFormulario Fin')
               setIsLoading(false)
             } catch (error) {
               console.error('Error:', error)
@@ -258,8 +246,6 @@ const Anulaciones = () => {
               })
             }
           } else {
-            console.log("Error la respuesta es diferente a 00 o 10")
-            console.log('Aca debe ir el swal notificando que la transaccion de no fue exitosa')
 
             swal({
               title: "Error",
