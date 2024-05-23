@@ -17,7 +17,9 @@ const Anulaciones = () => {
   const userEmail = localStorage.getItem('userEmail')
   const userIP = localStorage.getItem('userIP')
 
-  const transaccionAPI = 'https://e7sffoygdj.execute-api.us-east-1.amazonaws.com/dev/anulacion/obtener'
+  const transaccionAPI = process.env.REACT_APP_OBTENER_TRANSACCION_API
+  const neoNetAnulacionAPI = process.env.REACT_APP_NEONET_ANULACION_API
+  const anulacionAPI = process.env.REACT_APP_ANULACION_API
 
   useEffect(() => {
     if (transaccionObtenida.motivo !== undefined) {
@@ -176,7 +178,7 @@ const Anulaciones = () => {
         }
 
         try {
-          const response = await fetch('https://vbfz5r6da3.execute-api.us-east-1.amazonaws.com/dev/payment-neonet', {
+          const response = await fetch(neoNetAnulacionAPI, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json'
@@ -211,7 +213,7 @@ const Anulaciones = () => {
             }
 
             try {
-              const responseDynamo = await fetch('https://e7sffoygdj.execute-api.us-east-1.amazonaws.com/dev/anulacion', {
+              const responseDynamo = await fetch(anulacionAPI, {
                 method: 'POST',
                 headers: {
                   'Content-Type': 'application/json'
