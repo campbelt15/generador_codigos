@@ -13,6 +13,7 @@ const Anulaciones = () => {
   const [descripcion, setDescripcion] = useState('')
   const [transaccionObtenida, setTransaccionObtenida] = useState({})
   const [error, setError] = useState(false)
+  const [errorAnulacion, setErrorAnulacion] = useState(false)
 
   const userEmail = localStorage.getItem('userEmail')
   const userIP = localStorage.getItem('userIP')
@@ -152,11 +153,11 @@ const Anulaciones = () => {
     event.preventDefault()
 
     if ([descripcion].includes('')) {
-      setError(true)
+      setErrorAnulacion(true)
       return
     }
 
-    setError(false)
+    setErrorAnulacion(false)
 
     swal({
       title: "Confirmar Anulación",
@@ -275,11 +276,7 @@ const Anulaciones = () => {
   
   return (
     <>
-    {error && (
-                  <p className="alert alert-danger text-center">
-                    Todos los campos son obligatorios
-                  </p>
-                )}
+    
       <div style={{ display: 'flex' }} className="flex-container">
       
         <div style={{ flex: 1 }}>
@@ -287,8 +284,14 @@ const Anulaciones = () => {
           <Card>
             <CardHeader style={{ backgroundColor: '#1274c5', color: '#fff' }}>
               <CardTitle>Usuario de servicio al cliente</CardTitle>
+
             </CardHeader>
             <CardBody>
+            {error && (
+                  <p className="alert alert-danger text-center mt-2">
+                    Todos los campos son obligatorios
+                  </p>
+                )}
               <form className="mt-2" onSubmit={handleSubmit}>
                 
                 <div className="mb-1">
@@ -359,6 +362,11 @@ const Anulaciones = () => {
                   <CardTitle>Transacción obtenida:</CardTitle>
                 </CardHeader>
                 <CardBody>
+                {errorAnulacion && (
+                  <p className="alert alert-danger text-center mt-2">
+                    Todos los campos son obligatorios
+                  </p>
+                )}
                   <form className="mt-2" onSubmit={handleSubmitAnulation}>
                   <div className="row mb-1">
                       <div className="col">
@@ -377,6 +385,7 @@ const Anulaciones = () => {
                           id="motivo" 
                           value={motivo} 
                           onChange={(e) => setMotivo(e.target.value)}
+                          disabled={isAnularDisabled()}
                         >
                           <option value="duplicidad">Duplicidad de compra</option>
                           <option value="insatisfaccion">Insatisfacción con el servicio</option>
@@ -390,7 +399,8 @@ const Anulaciones = () => {
                         Descripción
                       </Label>
                       <Input type="text" id="descripcion" value={descripcion} 
-                          onChange={(e) => setDescripcion(e.target.value)} />
+                          onChange={(e) => setDescripcion(e.target.value)}
+                          disabled={isAnularDisabled()} />
                       </div>
 
                   </div>
