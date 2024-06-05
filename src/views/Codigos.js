@@ -9,7 +9,7 @@ import { InputText } from 'primereact/inputtext'
 const Codigos = () => {
     const reactivateApi = process.env.REACT_APP_REACTIVATE_API
     const listarCodigosApi = process.env.REACT_APP_LISTAR_CODIGOS_API
-    const excelFacturacionApi = process.env.REACT_APP_EXCEL_FACTURA_API
+
     const [isLoading, setIsLoading] = useState(true)
     const [data, setData] = useState([])
     const [globalFilter, setGlobalFilter] = useState(null)
@@ -27,7 +27,7 @@ const Codigos = () => {
           console.error('Error al cargar los datos:', error)
         })
         .finally(() => {
-          setIsLoading(false)// Finalizar la carga después de obtener los datos o en caso de error
+          setIsLoading(false)
         })
     }
     
@@ -81,47 +81,6 @@ const Codigos = () => {
       }
     }
 
-    const handleDownloadExcel = async () => {
-      try {
-        const response = await fetch(
-          excelFacturacionApi,
-          {
-            headers: {
-              "Content-Type": "application/json"
-            }
-          }
-        )
-
-        if (response.ok) {
-          const data = await response.json() // Parse the JSON
-          const url = JSON.parse(data.body).url // Extract the URL from the nested JSON
-
-          window.location.href = url
-          // window.location.href = url
-          swal({
-            title: "Excel",
-            text: "Descargado correctamente.",
-            icon: "success",
-            button: "OK",
-            timer: "3000"
-          })
-          loadData()
-        } else {
-          swal({
-            title: "Error al descargar",
-            text: response.statusText,
-            icon: "warning",
-            button: "OK",
-            timer: "3000"
-          })
-
-        }
-      } catch (error) {
-        // Manejar errores aquí
-        console.error("Error al descargar", error)
-      }
-    }
-
     const header = (
       <>
       <div className="fs-2 mb-3">
@@ -132,15 +91,6 @@ const Codigos = () => {
           type="search" 
           onInput={(e) => setGlobalFilter(e.target.value)} placeholder="Buscar..." />
         </span>
-
-        <button 
-            type="button" 
-            className="ms-5 btn btn-primary"
-            onClick={handleDownloadExcel}
-            
-          >
-            Descargar Excel
-        </button>
       </div>
       </>
     )

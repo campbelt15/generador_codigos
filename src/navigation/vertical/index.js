@@ -1,4 +1,4 @@
-import { Archive, Home, Users, List } from "react-feather"
+import { Archive, Home, Users, List, FileText } from "react-feather"
 
 export default [
   {
@@ -18,5 +18,11 @@ export default [
     title: "Anulaciones",
     icon: <List size={20} />,
     navLink: "/anulaciones"
+  },
+  {
+    id: "reportes",
+    title: "Reportes",
+    icon: <FileText size={20} />,
+    navLink: "/reportes"
   }
 ]

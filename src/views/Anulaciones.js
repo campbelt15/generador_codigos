@@ -64,6 +64,9 @@ const Anulaciones = () => {
 
     if ([noTransaccion, telefono, fecha].includes('')) {
       setError(true)
+      setTimeout(() => {
+        setError(false)
+      }, 3000)
     } else {
       setError(false)
       setIsLoading(true)
@@ -141,7 +144,7 @@ const Anulaciones = () => {
           text: error.message,
           icon: 'error',
           button: 'OK',
-          timer: 3000
+          timer: 4000
         })
         
       }
@@ -154,6 +157,9 @@ const Anulaciones = () => {
 
     if ([descripcion].includes('')) {
       setErrorAnulacion(true)
+      setTimeout(() => {
+        setErrorAnulacion(false)
+      }, 4000)
       return
     }
 
@@ -192,11 +198,7 @@ const Anulaciones = () => {
           }
 
           const responseData = await response.json()
-
-          // Parsear la cadena JSON en el campo 'body'
           const bodyData = JSON.parse(responseData.body)
-
-          // Acceder a elementos específicos
           const ResponseCode = bodyData.ResponseCode
 
           if (ResponseCode === "00" || ResponseCode === "10") {
@@ -249,7 +251,6 @@ const Anulaciones = () => {
               })
             }
           } else {
-
             swal({
               title: "Error",
               text: "Error en la solicitud",
@@ -276,15 +277,11 @@ const Anulaciones = () => {
   
   return (
     <>
-    
       <div style={{ display: 'flex' }} className="flex-container">
-      
         <div style={{ flex: 1 }}>
-        
           <Card>
             <CardHeader style={{ backgroundColor: '#1274c5', color: '#fff' }}>
               <CardTitle>Usuario de servicio al cliente</CardTitle>
-
             </CardHeader>
             <CardBody>
             {error && (
@@ -292,8 +289,7 @@ const Anulaciones = () => {
                     Todos los campos son obligatorios
                   </p>
                 )}
-              <form className="mt-2" onSubmit={handleSubmit}>
-                
+              <form className="mt-2" onSubmit={handleSubmit}>       
                 <div className="mb-1">
                   <Label className="form-label" for="tel_number">
                     Número de teléfono
@@ -351,7 +347,6 @@ const Anulaciones = () => {
             </CardBody>
           </Card>
         </div>
-
         <div style={{ flex: 2, marginLeft: '20px' }}>
           {isLoading ? (
             <p>Cargando datos...</p>
@@ -392,7 +387,6 @@ const Anulaciones = () => {
                         </Input>
                       </div>
                   </div>
-
                   <div className="row mb-1">
                       <div className="col">
                       <Label className="form-label" for="descripcion">
@@ -402,9 +396,7 @@ const Anulaciones = () => {
                           onChange={(e) => setDescripcion(e.target.value)}
                           disabled={isAnularDisabled()} />
                       </div>
-
                   </div>
-
                   <div className="row mb-1">
                       <div className="col">
                       <Label className="form-label" for="retrievalrefno">
@@ -418,9 +410,8 @@ const Anulaciones = () => {
                       </Label>
                       <Input type="text" id="systems_trace_no" value={transaccionObtenida.systems_trace_no || ''} readOnly />
                       </div>
-                    </div>
-
-                    <div className="row mb-1">
+                  </div>
+                  <div className="row mb-1">
                       <div className="col">
                       <Label className="form-label" for="name">
                         Nombre
@@ -433,9 +424,8 @@ const Anulaciones = () => {
                       </Label>
                       <Input type="text" id="email" value={transaccionObtenida.email || ''} readOnly />
                       </div>
-                    </div>
-
-                    <div className="row mb-1">
+                  </div>
+                  <div className="row mb-1">
                       <div className="col">
                         <Label className="form-label" for="fecha">
                           Fecha
@@ -448,9 +438,8 @@ const Anulaciones = () => {
                       </Label>
                       <Input type="text" id="phone_number" value={transaccionObtenida.phone_number || ''} readOnly />
                       </div>
-                    </div>
-
-                    <div className="row mb-1">
+                  </div>
+                  <div className="row mb-1">
                       <div className="col">
                       <Label className="form-label" for="product">
                         Producto
@@ -463,9 +452,8 @@ const Anulaciones = () => {
                       </Label>
                       <Input type="text" id="price" value={transaccionObtenida.price || ''} readOnly />
                       </div>
-                    </div>
-
-                    <div className="row mb-1">
+                  </div>
+                  <div className="row mb-1">
                       <div className="col">
                       <Label className="form-label" for="nit">
                         NIT
@@ -478,9 +466,7 @@ const Anulaciones = () => {
                       </Label>
                       <Input type="text" id="codigo" value={transaccionObtenida.codigo || ''} readOnly />
                       </div>
-                    </div>
-
-                    
+                  </div>
                     <Button color="primary" block disabled={isAnularDisabled()}>
                       Anular
                     </Button>
@@ -488,7 +474,6 @@ const Anulaciones = () => {
                   </form>
                 </CardBody>
               </Card>
-
             )
           )}
         </div>
