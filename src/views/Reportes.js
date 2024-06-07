@@ -7,6 +7,8 @@ import UserLogs from "../@core/components/logs_user/UserLogs"
 const Reportes = () => {
   const [startDate, setStartDate] = useState('')
   const [endDate, setEndDate] = useState('')
+  const userEmail = localStorage.getItem('userEmail')
+  const userIP = localStorage.getItem('userIP')
 
   useEffect(() => {
     const today = new Date()
@@ -31,6 +33,7 @@ const Reportes = () => {
       if (response.ok) {
         const data = await response.json() // Parse the JSON
         const url = JSON.parse(data.body).url // Extract the URL from the nested JSON
+        await UserLogs('Descarga de Excel', '', `Fecha Inicial ${startDate} - Fecha Final ${endDate}`, userIP, userEmail)
 
         window.location.href = url
         swal({

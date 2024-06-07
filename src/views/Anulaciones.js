@@ -21,6 +21,8 @@ const Anulaciones = () => {
   const transaccionAPI = process.env.REACT_APP_OBTENER_TRANSACCION_API
   const neoNetAnulacionAPI = process.env.REACT_APP_NEONET_ANULACION_API
   const anulacionAPI = process.env.REACT_APP_ANULACION_API
+  const vaucherAPI = process.env.REACT_APP_VOUCHER_API
+
 
   useEffect(() => {
     if (transaccionObtenida.motivo !== undefined) {
@@ -200,8 +202,11 @@ const Anulaciones = () => {
           const responseData = await response.json()
           const bodyData = JSON.parse(responseData.body)
           const ResponseCode = bodyData.ResponseCode
-
-          if (ResponseCode === "00" || ResponseCode === "10") {
+          console.log('respuesta de la anulacion')
+          console.log(bodyData)
+          console.log('codigo de la respuesta')
+          console.log(ResponseCode)
+          if (ResponseCode === "00" || ResponseCode === "10" || ResponseCode === "35") {
             const dataAnulacion = {
               id: transaccionObtenida.id,
               cognito_id: transaccionObtenida.cognito_id,
@@ -213,6 +218,18 @@ const Anulaciones = () => {
               data: responseData,
               motivo,
               descripcion
+            }
+
+            const dataVaucher = {
+              authIdResponse: transaccionObtenida.authidresponse,
+              numeroTarjeta: transaccionObtenida.card,
+              vc: transaccionObtenida.vc,
+              monto: transaccionObtenida.price,
+              nombreTarjetahabiente: transaccionObtenida.nombreTarjetahabiente,
+              systemsTraceNo: transaccionObtenida.systems_trace_no,
+              retrievalRefNo: transaccionObtenida.retrievalrefno,
+              tipoVaucher: 'Anulación',
+              emails: transaccionObtenida.email
             }
 
             try {
@@ -227,6 +244,19 @@ const Anulaciones = () => {
               if (!responseDynamo.ok) {
                 throw new Error(`HTTP error! status: ${responseDynamo.status}`)
               }
+
+              const responseVaucher = await fetch(vaucherAPI, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(dataVaucher)
+              })
+
+              if (!responseVaucher.ok) {
+                throw new Error(`HTTP error! status: ${responseVaucher.status}`)
+              }
+
 
               swal({
                 title: "Anulado",
