@@ -1,6 +1,6 @@
 import React, { useState, useEffect  } from 'react'
 import { Card, CardHeader, CardBody, CardTitle, Label, Input, Button } from 'reactstrap'
-import swal from 'sweetalert'
+import swal from 'sweetalert2'
 
 import UserLogs from "../@core/components/logs_user/UserLogs"
 
@@ -20,6 +20,17 @@ const Reportes = () => {
   const excelFacturacionApi = process.env.REACT_APP_EXCEL_FACTURA_API
 
   const handleDownloadExcel = async () => {
+    // Mostrar el Sweet Alert de carga
+    swal.fire({
+      title: 'Descargando',
+      text: 'Por favor espera...',
+      icon: 'info',
+      allowOutsideClick: false,
+      didOpen: () => {
+        swal.showLoading()
+      }
+    })
+
     try {
       const response = await fetch(
         `${excelFacturacionApi}?startDate=${startDate}&endDate=${endDate}`,
@@ -29,6 +40,8 @@ const Reportes = () => {
           }
         }
       )
+      // Cerrar el Sweet Alert de carga
+      swal.close()
 
       if (response.ok) {
         const data = await response.json() // Parse the JSON
@@ -36,7 +49,7 @@ const Reportes = () => {
         await UserLogs('Descarga de Excel', '', `Fecha Inicial ${startDate} - Fecha Final ${endDate}`, userIP, userEmail)
 
         window.location.href = url
-        swal({
+        swal.fire({
           title: "Excel",
           text: "Descargado correctamente.",
           icon: "success",
@@ -45,7 +58,7 @@ const Reportes = () => {
         })
         loadData()
       } else {
-        swal({
+        swal.fire({
           title: "Error al descargar",
           text: response.statusText,
           icon: "warning",
