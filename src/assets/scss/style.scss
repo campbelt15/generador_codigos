@@ -25,3 +25,9 @@ WE WILL RELEASE FUTURE UPDATES SO IN ORDER TO NOT OVERWRITE YOUR STYLES IT'S BET
 		/* Elimina el margen izquierdo en pantallas pequeñas */
 	}
 }
+
+/* Estilos para SweetAlert2 */
+.swal2-confirm {
+	margin-right: 10px !important;
+	/* Ajusta este valor según sea necesario */
+}

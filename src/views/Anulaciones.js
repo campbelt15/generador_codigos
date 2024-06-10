@@ -1,6 +1,6 @@
 import React, { useState, useEffect} from 'react'
 import { Card, CardHeader, CardBody, CardTitle, Label, Input, Button } from 'reactstrap'
-import swal from 'sweetalert'
+import Swal from 'sweetalert2'
 
 import UserLogs from "../@core/components/logs_user/UserLogs"
 
@@ -98,7 +98,7 @@ const Anulaciones = () => {
           if (bodyData && typeof bodyData === 'object') {
             if (bodyData.message) {
 
-              swal({
+              Swal.fire({
                 title: 'Error en la solicitud',
                 text: 'No se encontró la transacción.',
                 icon: 'warning',
@@ -119,7 +119,7 @@ const Anulaciones = () => {
           } else {
             console.error('bodyData is not a valid object:', bodyData)
 
-            swal({
+            Swal.fire({
               title: 'Error en la solicitud',
               text: 'No se encontró la transacción.',
               icon: 'warning',
@@ -131,7 +131,7 @@ const Anulaciones = () => {
         } else {
           const errorResponse = await response.json()
           console.error('Server response:', errorResponse)
-          swal({
+          Swal.fire({
             title: 'Error en la solicitud',
             text: errorResponse.message || response.statusText,
             icon: 'warning',
@@ -141,7 +141,7 @@ const Anulaciones = () => {
           
         }
       } catch (error) {
-        swal({
+        Swal.fire({
           title: 'Error al realizar la solicitud',
           text: error.message,
           icon: 'error',
@@ -156,7 +156,7 @@ const Anulaciones = () => {
   
   const handleSubmitAnulation = async (event) => {
     event.preventDefault()
-
+  
     if ([descripcion].includes('')) {
       setErrorAnulacion(true)
       setTimeout(() => {
@@ -164,17 +164,19 @@ const Anulaciones = () => {
       }, 4000)
       return
     }
-
+  
     setErrorAnulacion(false)
-
-    swal({
+  
+    Swal.fire({
       title: "Confirmar Anulación",
       text: "¿Estás seguro de que deseas anular esta transacción?",
       icon: "warning",
-      buttons: true,
+      showCancelButton: true,
+      confirmButtonText: "Sí",
+      cancelButtonText: "cancelar",
       dangerMode: true
-    }).then(async (willDelete) => {
-      if (willDelete) {
+    }).then(async (result) => {
+      if (result.isConfirmed) {
         const payload = {
           TraceNo: transaccionObtenida.systems_trace_no,
           MessageTypeId: "0200",
@@ -185,7 +187,18 @@ const Anulaciones = () => {
           CVV: "",
           Amount: ""
         }
-
+  
+        // Mostrar el Sweet Alert de carga
+        Swal.fire({
+          title: 'Anulando transacción...',
+          text: 'Por favor espera...',
+          icon: 'info',
+          allowOutsideClick: false,
+          didOpen: () => {
+            Swal.showLoading()
+          }
+        })
+  
         try {
           const response = await fetch(neoNetAnulacionAPI, {
             method: 'POST',
@@ -194,18 +207,15 @@ const Anulaciones = () => {
             },
             body: JSON.stringify(payload)
           })
-
+  
           if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`)
           }
-
+  
           const responseData = await response.json()
           const bodyData = JSON.parse(responseData.body)
           const ResponseCode = bodyData.ResponseCode
-          console.log('respuesta de la anulacion')
-          console.log(bodyData)
-          console.log('codigo de la respuesta')
-          console.log(ResponseCode)
+  
           if (ResponseCode === "00" || ResponseCode === "10" || ResponseCode === "35") {
             const dataAnulacion = {
               id: transaccionObtenida.id,
@@ -219,7 +229,7 @@ const Anulaciones = () => {
               motivo,
               descripcion
             }
-
+  
             const dataVaucher = {
               authIdResponse: transaccionObtenida.authidresponse,
               numeroTarjeta: transaccionObtenida.card,
@@ -231,7 +241,7 @@ const Anulaciones = () => {
               tipoVaucher: 'Anulación',
               emails: transaccionObtenida.email
             }
-
+  
             try {
               const responseDynamo = await fetch(anulacionAPI, {
                 method: 'POST',
@@ -240,11 +250,11 @@ const Anulaciones = () => {
                 },
                 body: JSON.stringify(dataAnulacion)
               })
-
+  
               if (!responseDynamo.ok) {
                 throw new Error(`HTTP error! status: ${responseDynamo.status}`)
               }
-
+  
               const responseVaucher = await fetch(vaucherAPI, {
                 method: 'POST',
                 headers: {
@@ -252,58 +262,54 @@ const Anulaciones = () => {
                 },
                 body: JSON.stringify(dataVaucher)
               })
-
+  
               if (!responseVaucher.ok) {
                 throw new Error(`HTTP error! status: ${responseVaucher.status}`)
               }
-
-
-              swal({
+  
+              Swal.fire({
                 title: "Anulado",
                 text: "Anulación realizada correctamente.",
                 icon: "success",
-                button: "OK",
                 timer: 3000
               })
-
+  
               await UserLogs('Anulacion', transaccionObtenida.codigo, 'Anulacion', userIP, userEmail)
-
+  
               resetFormulario()
               setIsLoading(false)
             } catch (error) {
               console.error('Error:', error)
-              swal({
+              Swal.fire({
                 title: "Error",
                 text: "Error en la solicitud",
                 icon: "error",
-                button: "OK",
                 timer: 3000
               })
             }
           } else {
-            swal({
+            Swal.fire({
               title: "Error",
               text: "Error en la solicitud",
               icon: "warning",
-              button: "OK",
               timer: 3000
             })
           }
         } catch (error) {
           console.error('Error:', error)
-          swal({
+          Swal.fire({
             title: "Error",
             text: "Error en la solicitud",
             icon: "error",
-            button: "OK",
             timer: 3000
           })
         }
-
+  
         setIsLoading(false)
       }
     })
   }
+  
   
   return (
     <>
