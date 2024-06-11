@@ -1,4 +1,4 @@
-import React, { useState, useEffect  } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Card, CardHeader, CardBody, CardTitle, Label, Input, Button } from 'reactstrap'
 import swal from 'sweetalert2'
 
@@ -16,6 +16,20 @@ const Reportes = () => {
     setStartDate(formattedDate)
     setEndDate(formattedDate)
   }, [])
+
+  useEffect(() => {
+    const today = new Date()
+    const formattedToday = today.toISOString().split('T')[0]
+    if (startDate > formattedToday) {
+      setStartDate(formattedToday)
+    }
+  }, [startDate])
+
+  useEffect(() => {
+    if (endDate < startDate) {
+      setEndDate(startDate)
+    }
+  }, [endDate, startDate])
 
   const excelFacturacionApi = process.env.REACT_APP_EXCEL_FACTURA_API
 
@@ -43,20 +57,49 @@ const Reportes = () => {
       // Cerrar el Sweet Alert de carga
       swal.close()
 
-      if (response.ok) {
-        const data = await response.json() // Parse the JSON
-        const url = JSON.parse(data.body).url // Extract the URL from the nested JSON
-        await UserLogs('Descarga de Excel', '', `Fecha Inicial ${startDate} - Fecha Final ${endDate}`, userIP, userEmail)
+      console.log(response)
 
-        window.location.href = url
-        swal.fire({
-          title: "Excel",
-          text: "Descargado correctamente.",
-          icon: "success",
-          button: "OK",
-          timer: 3000
-        })
-        loadData()
+      if (response.ok) {
+        const data = await response.json()
+        const body = JSON.parse(data.body)
+
+        if (body.message) {
+          // Si el mensaje existe, mostrar una advertencia
+          swal.fire({
+            title: "No se encontraron datos",
+            text: body.message,
+            icon: "warning",
+            button: "OK",
+            timer: 3000
+          })
+        } else if (body.url) {
+          const url = body.url // Extraer la URL del JSON anidado
+          await UserLogs('Descarga de Excel', '', `Fecha Inicial ${startDate} - Fecha Final ${endDate}`, userIP, userEmail)
+
+          // Descargar el archivo Excel usando un enlace temporal
+          const link = document.createElement('a')
+          link.href = url
+          link.setAttribute('download', `reporte_facturacion-${new Date().toISOString()}.xlsx`)
+          document.body.appendChild(link)
+          link.click()
+          document.body.removeChild(link)
+
+          swal.fire({
+            title: "Excel",
+            text: "Descargado correctamente.",
+            icon: "success",
+            button: "OK",
+            timer: 3000
+          })
+        } else {
+          swal.fire({
+            title: "Error",
+            text: "No se pudo obtener la URL de descarga.",
+            icon: "error",
+            button: "OK",
+            timer: 3000
+          })
+        }
       } else {
         swal.fire({
           title: "Error al descargar",
@@ -69,6 +112,13 @@ const Reportes = () => {
     } catch (error) {
       // Manejar errores aquí
       console.error("Error al descargar", error)
+      swal.fire({
+        title: "Error",
+        text: "Ocurrió un error al intentar descargar el archivo.",
+        icon: "error",
+        button: "OK",
+        timer: 3000
+      })
     }
   }
   
@@ -88,6 +138,7 @@ const Reportes = () => {
                   id="startDate"
                   value={startDate}
                   onChange={e => setStartDate(e.target.value)}
+                  max={new Date().toISOString().split('T')[0]}
                 />
               </div>
               <div className="mb-3">
@@ -97,16 +148,15 @@ const Reportes = () => {
                   id="endDate"
                   value={endDate}
                   onChange={e => setEndDate(e.target.value)}
+                  min={startDate}
                 />
               </div>
-              <button 
-                  type="button" 
-                  className="btn btn-primary"
-                  onClick={handleDownloadExcel}
-                  
-                >
-                  Descargar Excel
-              </button>
+              <Button 
+                color="primary"
+                onClick={handleDownloadExcel}
+              >
+                Descargar Excel
+              </Button>
             </CardBody>
           </Card>
         </div>
