@@ -54,10 +54,7 @@ const Reportes = () => {
           }
         }
       )
-      // Cerrar el Sweet Alert de carga
-      swal.close()
-
-      console.log(response)
+      
 
       if (response.ok) {
         const data = await response.json()
@@ -83,7 +80,10 @@ const Reportes = () => {
           document.body.appendChild(link)
           link.click()
           document.body.removeChild(link)
+          // Cerrar el Sweet Alert de carga
+          swal.close()
 
+          //Modal de descargado
           swal.fire({
             title: "Excel",
             text: "Descargado correctamente.",
@@ -92,6 +92,10 @@ const Reportes = () => {
             timer: 3000
           })
         } else {
+          // Cerrar el Sweet Alert de carga
+          swal.close()
+
+          //modal de error
           swal.fire({
             title: "Error",
             text: "No se pudo obtener la URL de descarga.",
