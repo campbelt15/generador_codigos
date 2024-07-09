@@ -39,18 +39,35 @@ const Anulaciones = () => {
     return date.toISOString().split('T')[0]
   }
 
-  const restarDosDias = (fecha) => {
+  //Inicio de funciones para validacion de anulacion con dos dias habiles
+  const esFinDeSemana = (fecha) => {
+    const dia = fecha.getDay()
+    return dia === 6 || dia === 0 // Sábado = 6, Domingo = 0
+  }
+
+  const restarDosDiasHabiles = (fecha) => {
     const date = new Date(fecha)
-    date.setDate(date.getDate() - 2) // Resta dos días
-    return date.toISOString().split('T')[0]
-  }  
+    let diasRestados = 0
+  
+    //colocando < 2 ahora son tres dias habiles, si regresamos a dos dias habiles colocar < 1
+    while (diasRestados < 1) {
+      date.setDate(date.getDate() - 1)
+      if (!esFinDeSemana(date)) {
+        diasRestados++
+      }
+    }
+  
+    return formatFecha(date)
+  }
 
   const isAnularDisabled = () => {
     const status = transaccionObtenida.status
     const fechaTransaccion = new Date(transaccionObtenida.fecha)
-    const fechaLimite = new Date(restarDosDias(new Date()))
+    const fechaLimite = new Date(restarDosDiasHabiles(new Date()))
     return status === 'Anulado' || fechaTransaccion < fechaLimite
   }
+
+  //Fin de funciones para validacion de anulacion con dos dias habiles
 
   const resetFormulario = () => {
     setTelefono('')
@@ -264,8 +281,11 @@ const Anulaciones = () => {
               })
   
               if (!responseVaucher.ok) {
+                console.log('vaucher no enviado')
                 throw new Error(`HTTP error! status: ${responseVaucher.status}`)
               }
+
+              console.log('vaucher enviado')
   
               Swal.fire({
                 title: "Anulado",

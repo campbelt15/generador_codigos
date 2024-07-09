@@ -8,7 +8,7 @@ import { InputText } from 'primereact/inputtext'
 
 const Codigos = () => {
     const reactivateApi = process.env.REACT_APP_REACTIVATE_API
-    const listarCodigosApi = process.env.REACT_APP_LISTAR_CODIGOS_API
+    const codesListApi = process.env.REACT_APP_LISTAR_CODIGOS_API
 
     const [isLoading, setIsLoading] = useState(true)
     const [data, setData] = useState([])
@@ -17,7 +17,7 @@ const Codigos = () => {
     const userIP = localStorage.getItem('userIP')
 
     const loadData = () => {
-      fetch(listarCodigosApi)
+      fetch(codesListApi)
         .then(response => response.json())
         .then(data => {
           const responseBody = JSON.parse(data.body)
@@ -77,6 +77,13 @@ const Codigos = () => {
         }
       } catch (error) {
         // Manejar errores aquí
+        swal({
+          title: "Error al reactivar",
+          text: error,
+          icon: "warning",
+          button: "OK",
+          timer: "3000"
+        })
         console.error("Error al actualizar los datos", error)
       }
     }
