@@ -15,8 +15,8 @@ const Anulaciones = () => {
   const [error, setError] = useState(false)
   const [errorAnulacion, setErrorAnulacion] = useState(false)
 
-  const userEmail = localStorage.getItem('userEmail')
-  const userIP = localStorage.getItem('userIP')
+  const userEmail = sessionStorage.getItem('userEmail')
+  const userIP = sessionStorage.getItem('userIP')
 
   const transaccionAPI = process.env.REACT_APP_OBTENER_TRANSACCION_API
   const neoNetAnulacionAPI = process.env.REACT_APP_NEONET_ANULACION_API

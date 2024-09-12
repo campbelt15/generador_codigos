@@ -13,8 +13,8 @@ const Codigos = () => {
   const [isLoading, setIsLoading] = useState(true)
   const [codesData, setCodesData] = useState([])
   const [globalFilter, setGlobalFilter] = useState(null)
-  const userEmail = localStorage.getItem('userEmail')
-  const userIP = localStorage.getItem('userIP')
+  const userEmail = sessionStorage.getItem('userEmail')
+  const userIP = sessionStorage.getItem('userIP')
 
   const fetchCodesData = async () => {
     try {

@@ -7,8 +7,8 @@ import UserLogs from "../@core/components/logs_user/UserLogs"
 const Reportes = () => {
   const [startDate, setStartDate] = useState('')
   const [endDate, setEndDate] = useState('')
-  const userEmail = localStorage.getItem('userEmail')
-  const userIP = localStorage.getItem('userIP')
+  const userEmail = sessionStorage.getItem('userEmail')
+  const userIP = sessionStorage.getItem('userIP')
 
   useEffect(() => {
     const today = new Date()

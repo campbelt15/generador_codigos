@@ -36,11 +36,11 @@ const Home = () => {
   const SMS_API = process.env.REACT_APP_SMS_API
   const PLAN_API = process.env.REACT_APP_PLAN_API
 
-  const userEmail = localStorage.getItem("userEmail")
-  const userIP = localStorage.getItem("userIP")
+  const userEmail = sessionStorage.getItem("userEmail")
+  const userIP = sessionStorage.getItem("userIP")
 
   const checkSessionToken = () => {
-    const sessionToken = localStorage.getItem("sessionToken")
+    const sessionToken = sessionStorage.getItem("sessionToken")
     if (!sessionToken) {
       navigate("/login")
     }

@@ -56,16 +56,16 @@ const Login = () => {
     cognitoUser.completeNewPasswordChallenge(newPassword, updatedUserAttributes, {
       onSuccess: async (session) => {
         setShowModal(false)
-        localStorage.setItem('sessionToken', session.getIdToken().getJwtToken())
-        localStorage.setItem('userEmail', email)
-        localStorage.setItem('userName', name)
+        sessionStorage.setItem('sessionToken', session.getIdToken().getJwtToken())
+        sessionStorage.setItem('userEmail', email)
+        sessionStorage.setItem('userName', name)
 
         const ipCliente = await ObtenerIP() 
 
         await UserLogs('Login', '', 'Login', ipCliente, email)
 
         if (ipCliente) {
-          localStorage.setItem('userIP', ipCliente) 
+          sessionStorage.setItem('userIP', ipCliente) 
         }
 
         navigate('/home')
@@ -100,16 +100,16 @@ const Login = () => {
 
     newUser.authenticateUser(authenticationDetails, {
       onSuccess: async (session) => {
-        localStorage.setItem('sessionToken', session.getIdToken().getJwtToken()) 
-        localStorage.setItem('userEmail', email)
-        localStorage.setItem('userName', session.getIdToken().decodePayload().name)
+        sessionStorage.setItem('sessionToken', session.getIdToken().getJwtToken()) 
+        sessionStorage.setItem('userEmail', email)
+        sessionStorage.setItem('userName', session.getIdToken().decodePayload().name)
 
         const ipCliente = await ObtenerIP() 
 
         await UserLogs('Login', '', 'Login', ipCliente, email)
 
         if (ipCliente) {
-          localStorage.setItem('userIP', ipCliente) 
+          sessionStorage.setItem('userIP', ipCliente) 
         }
 
         navigate('/home')

@@ -27,9 +27,9 @@ import {
 // import defaultAvatar from "@src/assets/images/portrait/small/avatar-s-11.jpg"
 
 const UserDropdown = () => {
-  const userName_sin_formato = localStorage.getItem('userName') || ''
-  const userEmail = localStorage.getItem('userEmail')
-  const userIP = localStorage.getItem('userIP')
+  const userName_sin_formato = sessionStorage.getItem('userName') || ''
+  const userEmail = sessionStorage.getItem('userEmail')
+  const userIP = sessionStorage.getItem('userIP')
 
   //funcion para formatear el nombre
   function capitalize(str) {
@@ -50,10 +50,10 @@ const UserDropdown = () => {
     if (cognitoUser) {
       cognitoUser.signOut() // Cierra la sesión del usuario
 
-      localStorage.removeItem('sessionToken') 
-      localStorage.removeItem('userEmail') 
-      localStorage.removeItem('userIP') 
-      localStorage.removeItem('userName') 
+      sessionStorage.removeItem('sessionToken') 
+      sessionStorage.removeItem('userEmail') 
+      sessionStorage.removeItem('userIP') 
+      sessionStorage.removeItem('userName') 
 
       // Redirige al usuario a la página de inicio de sesión u otra página de tu elección
       window.location.href = '/login' // Cambia '/login' por la ruta deseada
