@@ -17,6 +17,7 @@ const Anulaciones = () => {
 
   const userEmail = sessionStorage.getItem('userEmail')
   const userIP = sessionStorage.getItem('userIP')
+  const token = sessionStorage.getItem('sessionToken')
 
   const transaccionAPI = process.env.REACT_APP_OBTENER_TRANSACCION_API
   const neoNetAnulacionAPI = process.env.REACT_APP_NEONET_ANULACION_API
@@ -217,14 +218,18 @@ const Anulaciones = () => {
         })
   
         try {
+          console.log(token)
           const response = await fetch(neoNetAnulacionAPI, {
             method: 'POST',
             headers: {
-              'Content-Type': 'application/json'
+              'Content-Type': 'application/json',
+              Authorization: token
             },
             body: JSON.stringify(payload)
           })
   
+          console.log(response)
+
           if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`)
           }
@@ -232,13 +237,15 @@ const Anulaciones = () => {
           const responseData = await response.json()
           const bodyData = JSON.parse(responseData.body)
           const ResponseCode = bodyData.ResponseCode
+          console.log('ResponseData:', responseData)
+          console.log('ResponseCode:', ResponseCode)
   
-          if (ResponseCode === "00" || ResponseCode === "10" || ResponseCode === "35") {
+          if (ResponseCode === "00" || ResponseCode === "10") {
             const dataAnulacion = {
               id: transaccionObtenida.id,
               cognito_id: transaccionObtenida.cognito_id,
               status: "Anulado",
-              ingreso: "0200",
+              ingreso: "0210",
               proceso: "020000",
               retrievalrefno: transaccionObtenida.retrievalrefno,
               responsecode: transaccionObtenida.responsecode,
