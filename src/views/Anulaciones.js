@@ -191,7 +191,7 @@ const Anulaciones = () => {
       icon: "warning",
       showCancelButton: true,
       confirmButtonText: "Sí",
-      cancelButtonText: "cancelar",
+      cancelButtonText: "Cancelar",
       dangerMode: true
     }).then(async (result) => {
       if (result.isConfirmed) {
@@ -208,9 +208,9 @@ const Anulaciones = () => {
   
         // Mostrar el Sweet Alert de carga
         Swal.fire({
-          title: 'Anulando transacción...',
-          text: 'Por favor espera...',
-          icon: 'info',
+          title: "Anulando transacción...",
+          text: "Por favor espera...",
+          icon: "info",
           allowOutsideClick: false,
           didOpen: () => {
             Swal.showLoading()
@@ -218,27 +218,32 @@ const Anulaciones = () => {
         })
   
         try {
-          console.log(token)
           const response = await fetch(neoNetAnulacionAPI, {
-            method: 'POST',
+            method: "POST",
             headers: {
-              'Content-Type': 'application/json',
+              "Content-Type": "application/json",
               Authorization: token
             },
             body: JSON.stringify(payload)
           })
   
-          console.log(response)
-
           if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`)
+            const errorMessage = `Error HTTP: ${response.status}`
+            throw new Error(errorMessage)
           }
   
           const responseData = await response.json()
-          const bodyData = JSON.parse(responseData.body)
-          const ResponseCode = bodyData.ResponseCode
-          console.log('ResponseData:', responseData)
-          console.log('ResponseCode:', ResponseCode)
+          console.log("responseData:", responseData)
+  
+          // Verificar si `data` existe en la respuesta
+          if (!responseData || !responseData.data) {
+            throw new Error("Respuesta inválida: falta el campo 'data'")
+          }
+  
+          const data = responseData.data
+          const ResponseCode = data.ResponseCode
+  
+          console.log("ResponseCode:", ResponseCode)
   
           if (ResponseCode === "00" || ResponseCode === "10") {
             const dataAnulacion = {
@@ -262,15 +267,15 @@ const Anulaciones = () => {
               nombreTarjetahabiente: transaccionObtenida.nombreTarjetahabiente,
               systemsTraceNo: transaccionObtenida.systems_trace_no,
               retrievalRefNo: transaccionObtenida.retrievalrefno,
-              tipoVaucher: 'Anulación',
+              tipoVaucher: "Anulación",
               emails: transaccionObtenida.email
             }
   
             try {
               const responseDynamo = await fetch(anulacionAPI, {
-                method: 'POST',
+                method: "POST",
                 headers: {
-                  'Content-Type': 'application/json'
+                  "Content-Type": "application/json"
                 },
                 body: JSON.stringify(dataAnulacion)
               })
@@ -280,19 +285,18 @@ const Anulaciones = () => {
               }
   
               const responseVaucher = await fetch(vaucherAPI, {
-                method: 'POST',
+                method: "POST",
                 headers: {
-                  'Content-Type': 'application/json'
+                  "Content-Type": "application/json"
                 },
                 body: JSON.stringify(dataVaucher)
               })
   
               if (!responseVaucher.ok) {
-                console.log('vaucher no enviado')
                 throw new Error(`HTTP error! status: ${responseVaucher.status}`)
               }
-
-              console.log('vaucher enviado')
+  
+              console.log("vaucher enviado")
   
               Swal.fire({
                 title: "Anulado",
@@ -301,32 +305,40 @@ const Anulaciones = () => {
                 timer: 3000
               })
   
-              await UserLogs('Anulacion', transaccionObtenida.codigo, 'Anulacion', userIP, userEmail)
+              await UserLogs(
+                "Anulacion",
+                transaccionObtenida.codigo,
+                "Anulacion",
+                userIP,
+                userEmail
+              )
   
               resetFormulario()
               setIsLoading(false)
             } catch (error) {
-              console.error('Error:', error)
+              console.error("Error:", error)
               Swal.fire({
                 title: "Error",
-                text: "Error en la solicitud",
+                text: error.message,
                 icon: "error",
                 timer: 3000
               })
             }
           } else {
+            const errorDetails =
+              data.PrivateUse63?.AlternateHostResponse22 || "Detalles no disponibles"
             Swal.fire({
               title: "Error",
-              text: "Error en la solicitud",
+              text: `Error en la solicitud: ${errorDetails}`,
               icon: "warning",
               timer: 3000
             })
           }
         } catch (error) {
-          console.error('Error:', error)
+          console.error("Error:", error)
           Swal.fire({
             title: "Error",
-            text: "Error en la solicitud",
+            text: error.message,
             icon: "error",
             timer: 3000
           })
@@ -336,7 +348,6 @@ const Anulaciones = () => {
       }
     })
   }
-  
   
   return (
     <>
