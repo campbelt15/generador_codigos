@@ -241,7 +241,7 @@ const Anulaciones = () => {
           }
 
           const responseData = await response.json()
-          console.log("responseData:", responseData)
+          // console.log("responseData:", responseData)
 
           // Verificar si `data` existe en la respuesta
           if (!responseData || !responseData.data) {
@@ -251,7 +251,7 @@ const Anulaciones = () => {
           const data = responseData.data
           const ResponseCode = data.ResponseCode
 
-          console.log("ResponseCode:", ResponseCode)
+          // console.log("ResponseCode:", ResponseCode)
 
           if (ResponseCode === "00" || ResponseCode === "10") {
             const dataAnulacion = {
@@ -304,7 +304,7 @@ const Anulaciones = () => {
                 throw new Error(`HTTP error! status: ${responseVaucher.status}`)
               }
 
-              console.log("vaucher enviado")
+              // console.log("vaucher enviado")
 
               Swal.fire({
                 title: "Anulado",
