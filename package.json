@@ -40,6 +40,7 @@
     "i18next-xhr-backend": "3.2.2",
     "jquery": "^3.6.0",
     "jsonwebtoken": "8.5.1",
+    "jwt-decode": "3.0.0",
     "moment": "^2.29.3",
     "nouislider": "^15.5.0",
     "nouislider-react": "^3.4.1",
@@ -107,7 +108,7 @@
   },
   "devDependencies": {
     "@types/sortablejs": "^1.10.6",
-    "eslint": "^8.15.0",
+    "eslint": "^7.11.0",
     "eslint-plugin-import": "^2.26.0",
     "eslint-plugin-react": "^7.29.4",
     "prettier": "^2.6.2",

@@ -1,43 +1,49 @@
-import React, { useState, useEffect} from 'react'
-import { Card, CardHeader, CardBody, CardTitle, Label, Input, Button } from 'reactstrap'
-import Swal from 'sweetalert2'
+import React, { useState, useEffect } from "react"
+import {
+  Card,
+  CardHeader,
+  CardBody,
+  CardTitle,
+  Label,
+  Input,
+  Button
+} from "reactstrap"
+import Swal from "sweetalert2"
 
 import UserLogs from "../@core/components/logs_user/UserLogs"
 
 const Anulaciones = () => {
   const [isLoading, setIsLoading] = useState(false)
-  const [telefono, setTelefono] = useState('')
-  const [noTransaccion, setNoTransaccion] = useState('')
-  const [fecha, setFecha] = useState('')
-  const [motivo, setMotivo] = useState('duplicidad')
-  const [descripcion, setDescripcion] = useState('')
+  const [telefono, setTelefono] = useState("")
+  const [noTransaccion, setNoTransaccion] = useState("")
+  const [fecha, setFecha] = useState("")
+  const [motivo, setMotivo] = useState("duplicidad")
+  const [descripcion, setDescripcion] = useState("")
   const [transaccionObtenida, setTransaccionObtenida] = useState({})
   const [error, setError] = useState(false)
   const [errorAnulacion, setErrorAnulacion] = useState(false)
 
-  const userEmail = sessionStorage.getItem('userEmail')
-  const userIP = sessionStorage.getItem('userIP')
-  const token = sessionStorage.getItem('sessionToken')
+  const userEmail = sessionStorage.getItem("userEmail")
+  const userIP = sessionStorage.getItem("userIP")
+  const token = sessionStorage.getItem("sessionToken")
 
   const transaccionAPI = process.env.REACT_APP_OBTENER_TRANSACCION_API
   const neoNetAnulacionAPI = process.env.REACT_APP_NEONET_ANULACION_API
   const anulacionAPI = process.env.REACT_APP_ANULACION_API
   const vaucherAPI = process.env.REACT_APP_VOUCHER_API
 
-
   useEffect(() => {
     if (transaccionObtenida.motivo !== undefined) {
-      setMotivo(transaccionObtenida.motivo || 'duplicidad')
+      setMotivo(transaccionObtenida.motivo || "duplicidad")
     }
     if (transaccionObtenida.descripcion !== undefined) {
-      setDescripcion(transaccionObtenida.descripcion || '')
+      setDescripcion(transaccionObtenida.descripcion || "")
     }
   }, [transaccionObtenida])
-  
 
   const formatFecha = (fecha) => {
     const date = new Date(fecha)
-    return date.toISOString().split('T')[0]
+    return date.toISOString().split("T")[0]
   }
 
   //Inicio de funciones para validacion de anulacion con dos dias habiles
@@ -49,7 +55,7 @@ const Anulaciones = () => {
   const restarDosDiasHabiles = (fecha) => {
     const date = new Date(fecha)
     let diasRestados = 0
-  
+
     //colocando < 2 ahora son tres dias habiles, si regresamos a dos dias habiles colocar < 1
     while (diasRestados < 1) {
       date.setDate(date.getDate() - 1)
@@ -57,7 +63,7 @@ const Anulaciones = () => {
         diasRestados++
       }
     }
-  
+
     return formatFecha(date)
   }
 
@@ -65,24 +71,24 @@ const Anulaciones = () => {
     const status = transaccionObtenida.status
     const fechaTransaccion = new Date(transaccionObtenida.fecha)
     const fechaLimite = new Date(restarDosDiasHabiles(new Date()))
-    return status === 'Anulado' || fechaTransaccion < fechaLimite
+    return status === "Anulado" || fechaTransaccion < fechaLimite
   }
 
   //Fin de funciones para validacion de anulacion con dos dias habiles
 
   const resetFormulario = () => {
-    setTelefono('')
-    setNoTransaccion('')
-    setFecha('')
-    setMotivo('duplicidad')
-    setDescripcion('')
+    setTelefono("")
+    setNoTransaccion("")
+    setFecha("")
+    setMotivo("duplicidad")
+    setDescripcion("")
     setTransaccionObtenida({})
   }
-  
+
   const handleSubmit = async (event) => {
     event.preventDefault()
 
-    if ([noTransaccion, telefono, fecha].includes('')) {
+    if ([noTransaccion, telefono, fecha].includes("")) {
       setError(true)
       setTimeout(() => {
         setError(false)
@@ -100,9 +106,9 @@ const Anulaciones = () => {
 
       try {
         const response = await fetch(transaccionAPI, {
-          method: 'POST',
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json'
+            "Content-Type": "application/json"
           },
           body: JSON.stringify(data)
         })
@@ -111,80 +117,82 @@ const Anulaciones = () => {
           const responseData = await response.json()
 
           // Verifica si responseData.body es una cadena y parsea si es necesario
-          const bodyData = responseData.body ? (typeof responseData.body === 'string' ? JSON.parse(responseData.body) : responseData.body) : {}
+          let bodyData = {}
+          if (responseData.body) {
+            if (typeof responseData.body === "string") {
+              bodyData = JSON.parse(responseData.body)
+            } else {
+              bodyData = responseData.body
+            }
+          }
 
-          if (bodyData && typeof bodyData === 'object') {
+          if (bodyData && typeof bodyData === "object") {
             if (bodyData.message) {
-
               Swal.fire({
-                title: 'Error en la solicitud',
-                text: 'No se encontró la transacción.',
-                icon: 'warning',
-                button: 'OK',
+                title: "Error en la solicitud",
+                text: "No se encontró la transacción.",
+                icon: "warning",
+                button: "OK",
                 timer: 3000
               })
               setTransaccionObtenida({})
-              setDescripcion('')
-              setMotivo('duplicidad')
+              setDescripcion("")
+              setMotivo("duplicidad")
               setIsLoading(false)
             } else {
               // Si bodyData es un objeto, asignarlo directamente
               const { data, ...filteredItem } = bodyData
               const parsedData = data && data.body ? JSON.parse(data.body) : {}
               setTransaccionObtenida({ ...filteredItem, parsedData })
-              
             }
           } else {
-            console.error('bodyData is not a valid object:', bodyData)
+            console.error("bodyData is not a valid object:", bodyData)
 
             Swal.fire({
-              title: 'Error en la solicitud',
-              text: 'No se encontró la transacción.',
-              icon: 'warning',
-              button: 'OK',
+              title: "Error en la solicitud",
+              text: "No se encontró la transacción.",
+              icon: "warning",
+              button: "OK",
               timer: 3000
             })
-           
           }
         } else {
           const errorResponse = await response.json()
-          console.error('Server response:', errorResponse)
+          console.error("Server response:", errorResponse)
           Swal.fire({
-            title: 'Error en la solicitud',
+            title: "Error en la solicitud",
             text: errorResponse.message || response.statusText,
-            icon: 'warning',
-            button: 'OK',
+            icon: "warning",
+            button: "OK",
             timer: 3000
           })
-          
         }
       } catch (error) {
         Swal.fire({
-          title: 'Error al realizar la solicitud',
+          title: "Error al realizar la solicitud",
           text: error.message,
-          icon: 'error',
-          button: 'OK',
+          icon: "error",
+          button: "OK",
           timer: 4000
         })
-        
       }
       setIsLoading(false)
     }
-  }  
-  
+  }
+
   const handleSubmitAnulation = async (event) => {
     event.preventDefault()
-  
-    if ([descripcion].includes('')) {
+
+    if ([descripcion].includes("")) {
       setErrorAnulacion(true)
       setTimeout(() => {
         setErrorAnulacion(false)
       }, 4000)
       return
     }
-  
+
     setErrorAnulacion(false)
-  
+
     Swal.fire({
       title: "Confirmar Anulación",
       text: "¿Estás seguro de que deseas anular esta transacción?",
@@ -205,7 +213,7 @@ const Anulaciones = () => {
           CVV: "",
           Amount: ""
         }
-  
+
         // Mostrar el Sweet Alert de carga
         Swal.fire({
           title: "Anulando transacción...",
@@ -216,7 +224,7 @@ const Anulaciones = () => {
             Swal.showLoading()
           }
         })
-  
+
         try {
           const response = await fetch(neoNetAnulacionAPI, {
             method: "POST",
@@ -226,25 +234,25 @@ const Anulaciones = () => {
             },
             body: JSON.stringify(payload)
           })
-  
+
           if (!response.ok) {
             const errorMessage = `Error HTTP: ${response.status}`
             throw new Error(errorMessage)
           }
-  
+
           const responseData = await response.json()
           console.log("responseData:", responseData)
-  
+
           // Verificar si `data` existe en la respuesta
           if (!responseData || !responseData.data) {
             throw new Error("Respuesta inválida: falta el campo 'data'")
           }
-  
+
           const data = responseData.data
           const ResponseCode = data.ResponseCode
-  
+
           console.log("ResponseCode:", ResponseCode)
-  
+
           if (ResponseCode === "00" || ResponseCode === "10") {
             const dataAnulacion = {
               id: transaccionObtenida.id,
@@ -258,7 +266,7 @@ const Anulaciones = () => {
               motivo,
               descripcion
             }
-  
+
             const dataVaucher = {
               authIdResponse: transaccionObtenida.authidresponse,
               numeroTarjeta: transaccionObtenida.card,
@@ -270,7 +278,7 @@ const Anulaciones = () => {
               tipoVaucher: "Anulación",
               emails: transaccionObtenida.email
             }
-  
+
             try {
               const responseDynamo = await fetch(anulacionAPI, {
                 method: "POST",
@@ -279,11 +287,11 @@ const Anulaciones = () => {
                 },
                 body: JSON.stringify(dataAnulacion)
               })
-  
+
               if (!responseDynamo.ok) {
                 throw new Error(`HTTP error! status: ${responseDynamo.status}`)
               }
-  
+
               const responseVaucher = await fetch(vaucherAPI, {
                 method: "POST",
                 headers: {
@@ -291,20 +299,20 @@ const Anulaciones = () => {
                 },
                 body: JSON.stringify(dataVaucher)
               })
-  
+
               if (!responseVaucher.ok) {
                 throw new Error(`HTTP error! status: ${responseVaucher.status}`)
               }
-  
+
               console.log("vaucher enviado")
-  
+
               Swal.fire({
                 title: "Anulado",
                 text: "Anulación realizada correctamente.",
                 icon: "success",
                 timer: 3000
               })
-  
+
               await UserLogs(
                 "Anulacion",
                 transaccionObtenida.codigo,
@@ -312,7 +320,7 @@ const Anulaciones = () => {
                 userIP,
                 userEmail
               )
-  
+
               resetFormulario()
               setIsLoading(false)
             } catch (error) {
@@ -326,7 +334,8 @@ const Anulaciones = () => {
             }
           } else {
             const errorDetails =
-              data.PrivateUse63?.AlternateHostResponse22 || "Detalles no disponibles"
+              data.PrivateUse63?.AlternateHostResponse22 ||
+              "Detalles no disponibles"
             Swal.fire({
               title: "Error",
               text: `Error en la solicitud: ${errorDetails}`,
@@ -343,27 +352,27 @@ const Anulaciones = () => {
             timer: 3000
           })
         }
-  
+
         setIsLoading(false)
       }
     })
   }
-  
+
   return (
     <>
-      <div style={{ display: 'flex' }} className="flex-container">
+      <div style={{ display: "flex" }} className="flex-container">
         <div style={{ flex: 1 }}>
           <Card>
-            <CardHeader style={{ backgroundColor: '#1274c5', color: '#fff' }}>
+            <CardHeader style={{ backgroundColor: "#1274c5", color: "#fff" }}>
               <CardTitle>Usuario de servicio al cliente</CardTitle>
             </CardHeader>
             <CardBody>
-            {error && (
-                  <p className="alert alert-danger text-center mt-2">
-                    Todos los campos son obligatorios
-                  </p>
-                )}
-              <form className="mt-2" onSubmit={handleSubmit}>       
+              {error && (
+                <p className="alert alert-danger text-center mt-2">
+                  Todos los campos son obligatorios
+                </p>
+              )}
+              <form className="mt-2" onSubmit={handleSubmit}>
                 <div className="mb-1">
                   <Label className="form-label" for="tel_number">
                     Número de teléfono
@@ -377,7 +386,7 @@ const Anulaciones = () => {
                     onChange={(event) => {
                       const input = event.target.value
                       const regex = /^[0-9\b]+$/
-                      if (input === '' || regex.test(input)) {
+                      if (input === "" || regex.test(input)) {
                         if (input.length <= 8) {
                           setTelefono(input)
                         }
@@ -397,7 +406,7 @@ const Anulaciones = () => {
                     onChange={(event) => {
                       const input = event.target.value
                       const regex = /^[0-9\b]+$/
-                      if (input === '' || regex.test(input)) {
+                      if (input === "" || regex.test(input)) {
                         setNoTransaccion(input)
                       }
                     }}
@@ -421,130 +430,194 @@ const Anulaciones = () => {
             </CardBody>
           </Card>
         </div>
-        <div style={{ flex: 2, marginLeft: '20px' }}>
+        <div style={{ flex: 2, marginLeft: "20px" }}>
           {isLoading ? (
             <p>Cargando datos...</p>
           ) : (
             transaccionObtenida && (
               <Card>
-                <CardHeader style={{ backgroundColor: '#1274c5', color: '#fff' }}>
+                <CardHeader
+                  style={{ backgroundColor: "#1274c5", color: "#fff" }}
+                >
                   <CardTitle>Transacción obtenida:</CardTitle>
                 </CardHeader>
                 <CardBody>
-                {errorAnulacion && (
-                  <p className="alert alert-danger text-center mt-2">
-                    Todos los campos son obligatorios
-                  </p>
-                )}
+                  {errorAnulacion && (
+                    <p className="alert alert-danger text-center mt-2">
+                      Todos los campos son obligatorios
+                    </p>
+                  )}
                   <form className="mt-2" onSubmit={handleSubmitAnulation}>
-                  <div className="row mb-1">
+                    <div className="row mb-1">
                       <div className="col">
-                      <Label className="form-label" for="status">
-                        Estatus
-                      </Label>
-                      <Input type="text" id="status" value={transaccionObtenida.status || ''} readOnly />
+                        <Label className="form-label" for="status">
+                          Estatus
+                        </Label>
+                        <Input
+                          type="text"
+                          id="status"
+                          value={transaccionObtenida.status || ""}
+                          readOnly
+                        />
                       </div>
-               
+
                       <div className="col">
                         <Label className="form-label" for="motivo">
                           Motivo de anulación
                         </Label>
-                        <Input 
-                          type="select" 
-                          id="motivo" 
-                          value={motivo} 
+                        <Input
+                          type="select"
+                          id="motivo"
+                          value={motivo}
                           onChange={(e) => setMotivo(e.target.value)}
                           disabled={isAnularDisabled()}
                         >
-                          <option value="duplicidad">Duplicidad de compra</option>
-                          <option value="insatisfaccion">Insatisfacción con el servicio</option>
+                          <option value="duplicidad">
+                            Duplicidad de compra
+                          </option>
+                          <option value="insatisfaccion">
+                            Insatisfacción con el servicio
+                          </option>
                         </Input>
                       </div>
-                  </div>
-                  <div className="row mb-1">
+                    </div>
+                    <div className="row mb-1">
                       <div className="col">
-                      <Label className="form-label" for="descripcion">
-                        Descripción
-                      </Label>
-                      <Input type="text" id="descripcion" value={descripcion} 
-                          onChange={(e) => setDescripcion(e.target.value)}
-                          disabled={isAnularDisabled()} />
-                      </div>
-                  </div>
-                  <div className="row mb-1">
-                      <div className="col">
-                      <Label className="form-label" for="retrievalrefno">
-                      No. Transaccion
+                        <Label className="form-label" for="descripcion">
+                          Descripción
                         </Label>
-                        <Input type="text" id="retrievalrefno" value={transaccionObtenida.retrievalrefno || ''} readOnly />
+                        <Input
+                          type="text"
+                          id="descripcion"
+                          value={descripcion}
+                          onChange={(e) => setDescripcion(e.target.value)}
+                          disabled={isAnularDisabled()}
+                        />
+                      </div>
+                    </div>
+                    <div className="row mb-1">
+                      <div className="col">
+                        <Label className="form-label" for="retrievalrefno">
+                          No. Transaccion
+                        </Label>
+                        <Input
+                          type="text"
+                          id="retrievalrefno"
+                          value={transaccionObtenida.retrievalrefno || ""}
+                          readOnly
+                        />
                       </div>
                       <div className="col">
-                      <Label className="form-label" for="systems_trace_no">
-                        No. Auditoria
-                      </Label>
-                      <Input type="text" id="systems_trace_no" value={transaccionObtenida.systems_trace_no || ''} readOnly />
+                        <Label className="form-label" for="systems_trace_no">
+                          No. Auditoria
+                        </Label>
+                        <Input
+                          type="text"
+                          id="systems_trace_no"
+                          value={transaccionObtenida.systems_trace_no || ""}
+                          readOnly
+                        />
                       </div>
-                  </div>
-                  <div className="row mb-1">
+                    </div>
+                    <div className="row mb-1">
                       <div className="col">
-                      <Label className="form-label" for="name">
-                        Nombre
-                      </Label>
-                      <Input type="text" id="name" value={transaccionObtenida.name || ''} readOnly />
+                        <Label className="form-label" for="name">
+                          Nombre
+                        </Label>
+                        <Input
+                          type="text"
+                          id="name"
+                          value={transaccionObtenida.name || ""}
+                          readOnly
+                        />
                       </div>
                       <div className="col">
-                      <Label className="form-label" for="email">
-                        Email
-                      </Label>
-                      <Input type="text" id="email" value={transaccionObtenida.email || ''} readOnly />
+                        <Label className="form-label" for="email">
+                          Email
+                        </Label>
+                        <Input
+                          type="text"
+                          id="email"
+                          value={transaccionObtenida.email || ""}
+                          readOnly
+                        />
                       </div>
-                  </div>
-                  <div className="row mb-1">
+                    </div>
+                    <div className="row mb-1">
                       <div className="col">
                         <Label className="form-label" for="fecha">
                           Fecha
                         </Label>
-                        <Input type="text" id="fecha" value={transaccionObtenida.fecha || ''} readOnly />
+                        <Input
+                          type="text"
+                          id="fecha"
+                          value={transaccionObtenida.fecha || ""}
+                          readOnly
+                        />
                       </div>
                       <div className="col">
-                      <Label className="form-label" for="phone_number">
-                        Número de teléfono
-                      </Label>
-                      <Input type="text" id="phone_number" value={transaccionObtenida.phone_number || ''} readOnly />
+                        <Label className="form-label" for="phone_number">
+                          Número de teléfono
+                        </Label>
+                        <Input
+                          type="text"
+                          id="phone_number"
+                          value={transaccionObtenida.phone_number || ""}
+                          readOnly
+                        />
                       </div>
-                  </div>
-                  <div className="row mb-1">
+                    </div>
+                    <div className="row mb-1">
                       <div className="col">
-                      <Label className="form-label" for="product">
-                        Producto
-                      </Label>
-                      <Input type="text" id="product" value={transaccionObtenida.product || ''} readOnly />
-                      </div>
-                      <div className="col">
-                      <Label className="form-label" for="price">
-                        Precio
-                      </Label>
-                      <Input type="text" id="price" value={transaccionObtenida.price || ''} readOnly />
-                      </div>
-                  </div>
-                  <div className="row mb-1">
-                      <div className="col">
-                      <Label className="form-label" for="nit">
-                        NIT
-                      </Label>
-                      <Input type="text" id="nit" value={transaccionObtenida.nit || ''} readOnly />
+                        <Label className="form-label" for="product">
+                          Producto
+                        </Label>
+                        <Input
+                          type="text"
+                          id="product"
+                          value={transaccionObtenida.product || ""}
+                          readOnly
+                        />
                       </div>
                       <div className="col">
-                      <Label className="form-label" for="codigo">
-                        Código
-                      </Label>
-                      <Input type="text" id="codigo" value={transaccionObtenida.codigo || ''} readOnly />
+                        <Label className="form-label" for="price">
+                          Precio
+                        </Label>
+                        <Input
+                          type="text"
+                          id="price"
+                          value={transaccionObtenida.price || ""}
+                          readOnly
+                        />
                       </div>
-                  </div>
+                    </div>
+                    <div className="row mb-1">
+                      <div className="col">
+                        <Label className="form-label" for="nit">
+                          NIT
+                        </Label>
+                        <Input
+                          type="text"
+                          id="nit"
+                          value={transaccionObtenida.nit || ""}
+                          readOnly
+                        />
+                      </div>
+                      <div className="col">
+                        <Label className="form-label" for="codigo">
+                          Código
+                        </Label>
+                        <Input
+                          type="text"
+                          id="codigo"
+                          value={transaccionObtenida.codigo || ""}
+                          readOnly
+                        />
+                      </div>
+                    </div>
                     <Button color="primary" block disabled={isAnularDisabled()}>
                       Anular
                     </Button>
-
                   </form>
                 </CardBody>
               </Card>
@@ -552,7 +625,6 @@ const Anulaciones = () => {
           )}
         </div>
       </div>
-
     </>
   )
 }

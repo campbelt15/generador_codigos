@@ -8,6 +8,7 @@ import HorizontalLayout from "@src/layouts/HorizontalLayout"
 import LayoutWrapper from "@src/@core/layouts/components/layout-wrapper"
 
 // ** Route Components
+import PrivateRoute from "@components/routes/PrivateRoute"
 import PublicRoute from "@components/routes/PublicRoute"
 
 // ** Utils
@@ -37,6 +38,7 @@ const Usuario = lazy(() => import("../../views/Usuario"))
 const Reportes = lazy(() => import("../../views/Reportes"))
 
 // ** Merge Routes
+// ** Merge Routes
 const Routes = [
   {
     path: "/",
@@ -45,23 +47,43 @@ const Routes = [
   },
   {
     path: "/home",
-    element: <Home />
+    element: (
+      <PrivateRoute>
+        <Home />
+      </PrivateRoute>
+    )
   },
   {
     path: "/codigos",
-    element: <Codigos />
+    element: (
+      <PrivateRoute>
+        <Codigos />
+      </PrivateRoute>
+    )
   },
   {
     path: "/anulaciones",
-    element: <Anulaciones />
+    element: (
+      <PrivateRoute>
+        <Anulaciones />
+      </PrivateRoute>
+    )
   },
   {
     path: "/reportes",
-    element: <Reportes />
+    element: (
+      <PrivateRoute>
+        <Reportes />
+      </PrivateRoute>
+    )
   },
   {
     path: "/usuario",
-    element: <Usuario />
+    element: (
+      <PrivateRoute>
+        <Usuario />
+      </PrivateRoute>
+    )
   },
   {
     path: "/login",
